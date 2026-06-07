@@ -164,6 +164,7 @@ select.inp{cursor:pointer}
     <div class="topbar-right">
       <span style="font-size:11px;color:var(--text3)">S26</span>
       <button class="btn btn-sm" id="install-btn" onclick="installApp()" style="display:none;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple);font-size:11px">📲 ติดตั้ง App</button>
+      <button class="btn btn-sm" onclick="clearChecks()" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bg)">🗑 ล้าง Check</button>
       <button class="btn btn-blue btn-sm" onclick="openAddFlight()">+ เที่ยวบิน</button>
     </div>
   </div>
@@ -1035,7 +1036,7 @@ function renderFlights(){
     CHECKS.forEach(c=>{
       const item = document.createElement('div');
       item.className = 'cl-item' + (checkState[i][c]?' done':'');
-      item.onclick = e=>{ e.stopPropagation(); checkState[i][c]=!checkState[i][c]; renderFlights(); };
+      item.onclick = e=>{ e.stopPropagation(); checkState[i][c]=!checkState[i][c]; renderFlights(); saveState(); };
       item.innerHTML = `<div class="cl-tick">${checkState[i][c]?'✓':''}</div><div class="cl-lbl">${c}</div>`;
       clDiv.appendChild(item);
     });
@@ -1098,6 +1099,7 @@ function saveFlightEdit(){
   else { flights[editIdx]=f; }
   closeModal('editModal');
   renderFlights();
+  saveState();
 }
 function deleteFlight(){
   if(!confirm(`ลบเที่ยวบิน 8K${flights[editIdx].no} ${flights[editIdx].dep}→${flights[editIdx].arr}?`)) return;
@@ -1105,6 +1107,7 @@ function deleteFlight(){
   delete checkState[editIdx];
   closeModal('editModal');
   renderFlights();
+  saveState();
 }
 
 // ===================== FAK / MEL =====================
@@ -1116,14 +1119,14 @@ function renderFAK(){
     const card=document.createElement('div'); card.className='fak-card';
     card.innerHTML=`<div class="fak-reg">${reg}</div>
       <div class="fak-row"><span style="color:var(--text3)">FAK</span>
-        <input class="inp" style="font-size:11px;text-align:right;width:160px" value="${d.fak}" onchange="fakData['${reg}'].fak=this.value">
+        <input class="inp" style="font-size:11px;text-align:right;width:160px" value="${d.fak}" onchange="fakData['${reg}'].fak=this.value; saveState();">
       </div>
       <div class="fak-row"><span style="color:var(--text3)">MEL Status</span>
         <input class="inp" style="font-size:11px;text-align:right;width:80px;color:${d.mel&&d.mel!=='-'?'var(--amber)':'var(--text)'}" 
-          value="${d.mel}" placeholder="Status/No." onchange="fakData['${reg}'].mel=this.value">
+          value="${d.mel}" placeholder="Status/No." onchange="fakData['${reg}'].mel=this.value; saveState();">
       </div>
       <div class="fak-row"><span style="color:var(--text3)">MEL No.</span>
-        <input class="mel-inp" value="${d.melNo}" placeholder="MEL-XXX-YY" onchange="fakData['${reg}'].melNo=this.value">
+        <input class="mel-inp" value="${d.melNo}" placeholder="MEL-XXX-YY" onchange="fakData['${reg}'].melNo=this.value; saveState();">
       </div>`;
     grid.appendChild(card);
   });
@@ -1385,6 +1388,7 @@ function setPlan(i, val, el){
   planningData[i].plan = val;
   el.className = 'plan-select ' + (PLAN_STYLES[val]||PLAN_STYLES.none).badge;
   renderPlanning();
+  saveState();
 }
 
 function autoCalcPlanAB(){
@@ -1441,6 +1445,7 @@ function savePlanRow(){
   else { planningData[editingPlanIdx] = row; }
   closeModal('planModal');
   renderPlanning();
+  saveState();
 }
 
 function deletePlanRow(){
@@ -1448,6 +1453,7 @@ function deletePlanRow(){
   planningData.splice(editingPlanIdx, 1);
   closeModal('planModal');
   renderPlanning();
+  saveState();
 }
 
 // ===================== PNR =====================
@@ -1476,7 +1482,73 @@ function calcCF(){
     </div>`;
 }
 
+// ===================== LOCAL STORAGE — AUTO SAVE =====================
+var LS_KEY = 'tum_kma_v1';
+
+function clearChecks() {
+  if(!confirm('ล้าง Check List ทั้งหมดใช่ไหม?')) return;
+  Object.keys(checkState).forEach(function(k){ checkState[k] = {}; });
+  renderFlights();
+  saveState();
+}
+
+function saveState() {
+  try {
+    var state = {
+      checkState:    checkState,
+      planningPlans: planningData.map(function(r){ return r.plan; }),
+      fakData:       fakData,
+      flights_mel:   flights.map(function(f){ return {mel: f.mel, remark: f.remark}; }),
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+
+    // Restore checkState
+    if (state.checkState) {
+      Object.keys(state.checkState).forEach(function(k){
+        checkState[k] = state.checkState[k];
+      });
+    }
+
+    // Restore plan selections
+    if (state.planningPlans) {
+      state.planningPlans.forEach(function(plan, i){
+        if (planningData[i]) planningData[i].plan = plan || 'none';
+      });
+    }
+
+    // Restore fakData
+    if (state.fakData) {
+      Object.keys(state.fakData).forEach(function(reg){
+        if (fakData[reg]) {
+          fakData[reg].fak   = state.fakData[reg].fak   || fakData[reg].fak;
+          fakData[reg].mel   = state.fakData[reg].mel   || fakData[reg].mel;
+          fakData[reg].melNo = state.fakData[reg].melNo || fakData[reg].melNo;
+        }
+      });
+    }
+
+    // Restore MEL/remark per flight
+    if (state.flights_mel) {
+      state.flights_mel.forEach(function(d, i){
+        if (flights[i]) {
+          flights[i].mel    = d.mel    || '';
+          flights[i].remark = d.remark || '';
+        }
+      });
+    }
+  } catch(e) {}
+}
+
 // ===================== INIT =====================
+loadState();
 renderFlights();
 renderFAK();
 renderPlanning();

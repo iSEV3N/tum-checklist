@@ -285,9 +285,16 @@ select.inp{cursor:pointer}
             </div>
           </div>
           <div class="card">
-            <div class="card-title">⬇ UNDERLOAD</div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:8px">น้ำหนักที่รับได้เพิ่มหลังหักลูกเรือและน้ำมันแล้ว = MTL</div>
+            <div class="card-title">📊 MATOW / Traffic Load / Underload</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px">เปรียบเทียบ 3 ด้าน (ZFW/TOW/LDW) ตามคู่มือ K-Mile Asia</div>
             <div id="underload-result"></div>
+            <div style="margin-top:12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Actual Traffic Load (สินค้า+Mail จริง)</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input class="inp" type="number" id="p_actual" placeholder="0" oninput="calcPayload()" style="width:150px;font-size:15px;font-weight:600">
+                <span id="lbl_actual" style="font-size:13px;color:var(--text3)">kg</span>
+              </div>
+            </div>
           </div>
           <div class="card">
             <div class="card-title">🧮 สูตรคำนวณ (ตรวจสอบจาก CUMPUTE Sheet)</div>
@@ -1182,7 +1189,7 @@ function renderFAK(){
         <span style="color:var(--text3);font-size:11px;width:40px">No.${n+1}</span>
         <input class="mel-inp" style="flex:1;width:100%;font-size:13px;padding:6px 10px;color:${d[k]?'var(--amber)':'var(--text)'}"
           value="${d[k]||''}" placeholder="MEL-XXX-YY"
-          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; saveState();" onblur="renderFAK();">
+          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; renderFAK_MELbadge(); saveState();">
       </div>`).join('')}`;
     grid.appendChild(card);
   });
@@ -1219,7 +1226,7 @@ function editFAKLimit(reg) {
 }
 
 function renderFAK_MELbadge(){
-  // Called only on blur now — safe to re-render
+  // Re-render only FAK grid headers (badge active/inactive)
   renderFAK();
 }
 
@@ -1369,29 +1376,74 @@ function calcPayload() {
       '</div>' +
       pathHTML;
 
-    // UNDERLOAD = MTL (remaining capacity after crew + fuel already in DOW/fuel fields)
+    // ── MATOW / Allowed Traffic Load / Underload (K-Mile Asia) ──
+    var actualTL = +(document.getElementById('p_actual') ? document.getElementById('p_actual').value : 0) || 0;
+    var lbl_act = document.getElementById('lbl_actual');
+    if(lbl_act) lbl_act.textContent = u;
+
+    // Allowed Traffic Load = AZFW - DOW
+    var allowedTL = azfw - dow;
+    var atl_ok = allowedTL >= 0;
+
+    // ZFW / TOW / LDW underload
+    var zfw_act = dow + actualTL;
+    var tow_act = zfw_act + tof;
+    var ldw_act = tow_act - trip;
+    var zfw_ul = mszfw - zfw_act;
+    var tow_ul = Math.min(mstow, pltow) - tow_act;
+    var ldw_ul = Math.min(mslw, pllw) - ldw_act;
+    var net_ul = Math.min(zfw_ul, tow_ul, ldw_ul);
+
+    function clr(v){ return v>=0?'var(--green)':'var(--red)'; }
+    function fmtUL(v){
+      return '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:'+clr(v)+'">' +
+        (v>=0?'+':'') + Math.round(v).toLocaleString() + ' ' + u + '</span>' +
+        ' <span style="font-size:10px;color:var(--text3)">(' + Math.round(Math.abs(v)*conv).toLocaleString() + ' ' + u2 + ')</span>';
+    }
+
     var underloadEl = document.getElementById('underload-result');
-    if (underloadEl) {
-      var ul_ok = mtl >= 0;
-      var ul_sec = Math.round(Math.abs(mtl) * conv);
-      var mtlRound = Math.round(mtl);
-      underloadEl.innerHTML =
-        '<div style="background:' + (ul_ok ? 'var(--blue-bg)' : 'var(--red-bg)') +
-        ';border:1px solid ' + (ul_ok ? 'var(--blue)' : 'var(--red)') +
-        ';border-radius:8px;padding:14px">' +
-          '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:' + (ul_ok ? 'var(--blue)' : 'var(--red)') + ';margin-bottom:6px">' +
-            (ul_ok ? 'รับน้ำหนักเพิ่มได้อีก' : '⚠ น้ำหนักเกิน') +
+    if(underloadEl){
+      // Section 1: MATOW
+      var s1 = '<div style="margin-bottom:12px">' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">1. Allowed Weight for Take-off (MATOW)</div>' +
+        '<div class="limit-row">' +
+          '<div class="limit-cell' + (atw===atw_zfw?' binding':'') + '"><div class="lc-lbl">A: MSZFW+TOF</div><div class="lc-val">' + fmtPlain(atw_zfw) + '</div></div>' +
+          '<div class="limit-cell' + (atw===atw_str?' binding':'') + '"><div class="lc-lbl">B: MSTOW/PLTOW</div><div class="lc-val">' + fmtPlain(atw_str) + '</div></div>' +
+          '<div class="limit-cell' + (atw===atw_lw?' binding':'') + '"><div class="lc-lbl">C: MSLW+Trip</div><div class="lc-val">' + fmtPlain(atw_lw) + '</div></div>' +
+        '</div>' +
+        '<div style="margin-top:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-size:12px;color:var(--text2)">MATOW (ค่าต่ำสุด — Binding: ' + bind_atw + ')</span>' +
+          '<span style="font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text)">' + fmtPlain(atw) + '</span>' +
+        '</div></div>';
+
+      // Section 2: Allowed Traffic Load
+      var s2 = '<div style="margin-bottom:12px">' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">2. Allowed Traffic Load</div>' +
+        '<div style="background:' + (atl_ok?'var(--blue-bg)':'var(--red-bg)') + ';border:1px solid ' + (atl_ok?'var(--blue)':'var(--red)') + ';border-radius:8px;padding:10px 14px">' +
+          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px">= AZFW − DOW = ' + fmtPlain(azfw) + ' − ' + fmtPlain(dow) + '</div>' +
+          '<div style="font-size:28px;font-weight:700;font-family:var(--mono);color:' + (atl_ok?'var(--blue)':'var(--red)') + '">' +
+            (atl_ok?'':'−') + Math.abs(Math.round(allowedTL)).toLocaleString() + ' ' + u + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);margin-top:2px">= ' + Math.round(Math.abs(allowedTL)*conv).toLocaleString() + ' ' + u2 + '</div>' +
+        '</div></div>';
+
+      // Section 3: Underload
+      var s3 = actualTL > 0
+        ? '<div>' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">3. Underload — Actual: ' + actualTL.toLocaleString() + ' ' + u + '</div>' +
+          '<div class="limit-row">' +
+            '<div class="limit-cell' + (net_ul===zfw_ul?' binding':'') + '"><div class="lc-lbl">ZFW Underload</div><div class="lc-val">' + fmtUL(zfw_ul) + '</div></div>' +
+            '<div class="limit-cell' + (net_ul===tow_ul?' binding':'') + '"><div class="lc-lbl">TOW Underload</div><div class="lc-val">' + fmtUL(tow_ul) + '</div></div>' +
+            '<div class="limit-cell' + (net_ul===ldw_ul?' binding':'') + '"><div class="lc-lbl">LDW Underload</div><div class="lc-val">' + fmtUL(ldw_ul) + '</div></div>' +
           '</div>' +
-          '<div style="font-size:30px;font-weight:600;font-family:var(--mono);color:' + (ul_ok ? 'var(--blue)' : 'var(--red)') + ';line-height:1.1">' +
-            (ul_ok ? '' : '-') + Math.abs(mtlRound).toLocaleString() + ' ' + u +
-          '</div>' +
-          '<div style="font-size:12px;color:var(--text3);margin-top:5px">' +
-            '= ' + (ul_ok ? '' : '-') + ul_sec.toLocaleString() + ' ' + u2 +
-          '</div>' +
-          '<div style="font-size:11px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid ' + (ul_ok ? 'rgba(88,166,255,0.2)' : 'rgba(248,81,73,0.2)') + '">' +
-            'AZFW ' + fmtPlain(azfw) + ' − DOW ' + fmtPlain(dow) + ' = <b style="color:' + (ul_ok ? 'var(--blue)' : 'var(--red)') + '">' + (ul_ok ? '+' : '') + mtlRound.toLocaleString() + ' ' + u + '</b>' +
-          '</div>' +
-        '</div>';
+          '<div style="margin-top:8px;background:' + (net_ul>=0?'var(--green-bg)':'var(--red-bg)') + ';border:1px solid ' + (net_ul>=0?'var(--green)':'var(--red)') + ';border-radius:8px;padding:10px 14px">' +
+            '<div style="font-size:11px;color:' + (net_ul>=0?'var(--green)':'var(--red)') + ';margin-bottom:4px">' + (net_ul>=0?'✅ Net Underload (ค่าต่ำสุดจาก ZFW/TOW/LDW)':'⚠ OVERLOAD') + '</div>' +
+            '<div style="font-size:28px;font-weight:700;font-family:var(--mono);color:' + (net_ul>=0?'var(--green)':'var(--red)') + '">' +
+              (net_ul>=0?'+':'') + Math.round(net_ul).toLocaleString() + ' ' + u + '</div>' +
+            '<div style="font-size:11px;color:var(--text3);margin-top:2px">= ' + (net_ul>=0?'+':'') + Math.round(net_ul*conv).toLocaleString() + ' ' + u2 + '</div>' +
+          '</div></div>'
+        : '<div style="font-size:12px;color:var(--text3);padding:10px;background:var(--bg3);border-radius:6px;border:1px dashed var(--border)">ใส่ Actual Traffic Load เพื่อคำนวณ Underload (ZFW / TOW / LDW)</div>';
+
+      underloadEl.innerHTML = s1 + s2 + s3;
     }
   } catch(e) {}
 }

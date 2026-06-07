@@ -84,7 +84,9 @@ select.inp{cursor:pointer}
 .progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.3s}
 /* Daily flight cards */
 .flight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px;margin-bottom:14px}
-.fc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.fc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color 0.2s}
+.fc-crew{border-left:4px solid var(--blue);background:linear-gradient(90deg,rgba(31,58,95,0.18) 0%,transparent 60%)}
+.fc-mel-banner{display:flex;align-items:center;gap:8px;background:rgba(210,153,34,0.13);border-top:1px solid rgba(210,153,34,0.3);padding:7px 12px;font-size:12px}
 .fc-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer}
 .fc-head:hover{background:var(--bg3)}
 .fc-no{font-size:17px;font-weight:600;font-family:var(--mono);color:var(--blue)}
@@ -1001,34 +1003,62 @@ function renderFlights(){
     if(!checkState[i]) checkState[i]={};
     const done = CHECKS.filter(c=>checkState[i][c]).length;
     const pct = Math.round(done/CHECKS.length*100);
-    const isPos = f.reg==='-' || !f.reg;
+    const isPos = f.reg==='-' || !f.reg || f.pic==='-' || !f.pic;
+    const hasCrew = f.pic && f.pic!=='-' && f.pic.trim()!=='';
     const regCol = isPos ? `<span class="tag tag-amber">POS</span>` : `<span class="tag tag-blue">${f.reg}</span>`;
-    const melBadge = f.mel ? `<span class="tag tag-amber" style="font-size:9px">MEL:${f.mel}</span>` : '';
+
+    // MEL lookup: match flight REG to fakData key
+    // fakData keys: 'KMA/KMB', 'KMD', 'KME', 'KSA', 'KSB'
+    function getMelForReg(reg) {
+      if(!reg || reg==='-') return null;
+      for(const key of Object.keys(fakData)) {
+        if(key.split('/').includes(reg)) return fakData[key];
+      }
+      return null;
+    }
+    const fakEntry = getMelForReg(f.reg);
+    const hasMel = fakEntry && fakEntry.melNo && fakEntry.melNo.trim()!=='';
+    const melFromFAK = hasMel ? fakEntry.melNo : '';
+    const melFromFlight = f.mel ? f.mel : '';
+    const allMel = [melFromFAK, melFromFlight].filter(Boolean).join(' | ');
+
     const div = document.createElement('div');
-    div.className = 'fc';
+    div.className = 'fc' + (hasCrew ? ' fc-crew' : '');
     div.innerHTML = `
       <div class="fc-head" onclick="openEdit(${i})">
-        <span class="fc-no">8K${f.no}</span>
-        ${regCol}
-        <span class="fc-route">${f.dep} → ${f.arr}</span>
-        ${melBadge}
-        <span class="fc-times">${f.std}–${f.sta}</span>
-        <span style="color:var(--text3);font-size:11px;margin-left:6px">✏</span>
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <span class="fc-no">8K${f.no}</span>
+          ${regCol}
+          ${hasCrew ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.3);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--blue);white-space:nowrap">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block"></span>
+            ${f.pic}
+          </span>` : ''}
+          <span class="fc-route" style="color:var(--text);font-weight:600">${f.dep} → ${f.arr}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span class="fc-times">${f.std}–${f.sta}</span>
+          <span style="color:var(--text3);font-size:12px">✏</span>
+        </div>
       </div>
+      ${allMel ? `<div class="fc-mel-banner">
+        <span style="color:var(--amber);font-weight:600;font-size:13px">⚠ MEL</span>
+        <span style="font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:600">${allMel}</span>
+        <span style="color:var(--text3);font-size:11px">${f.reg!=='-'?'REG: '+f.reg:''}</span>
+      </div>` : ''}
       <div class="fc-body">
-        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-bottom:8px">
-          ${f.fdp?`<span style="color:var(--text2)">FDP:</span> <span class="mono" style="color:var(--amber)">${f.fdp}</span>`:''}
-          ${f.maxfdp?`<span style="color:var(--text3)">${f.maxfdp}</span>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px;margin-bottom:8px;align-items:center">
+          ${f.fdp?`<span style="color:var(--text2)">FDP:</span> <span class="mono" style="color:var(--amber);font-size:12px">${f.fdp}</span>`:''}
+          ${f.maxfdp?`<span style="color:var(--text3);font-size:11px">${f.maxfdp}</span>`:''}
           ${f.crew_fig&&f.crew_fig!=='-'?`<span style="color:var(--text3)">Crew: <b style="color:var(--text)">${f.crew_fig}</b></span>`:''}
+          ${hasCrew&&f.fo&&f.fo!=='-'?`<span style="color:var(--text3)">F/O: <b style="color:var(--text)">${f.fo}</b></span>`:''}
         </div>
-        ${(f.pic&&f.pic!=='-')?`<div style="font-size:11px;color:var(--text2);margin-bottom:4px">PIC: <b style="color:var(--text)">${f.pic}</b> &nbsp;|&nbsp; F/O: <b style="color:var(--text)">${f.fo}</b></div>`:''}
-        ${f.rwy_dep&&f.rwy_dep!=='-'?`<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--text3)">DEP RWY Closed:</span> <span class="rwy-badge">${f.rwy_dep}</span></div>`:''}
-        ${f.rwy_arr&&f.rwy_arr!=='-'?`<div style="font-size:10px;margin-bottom:3px"><span style="color:var(--text3)">ARR RWY Closed:</span> <span class="rwy-badge">${f.rwy_arr}</span></div>`:''}
-        ${f.remark?`<div style="font-size:10px;color:var(--purple);margin-bottom:4px">${f.remark}</div>`:''}
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px">
-          <span>Check List</span><span>${done}/${CHECKS.length}</span>
+        ${f.rwy_dep&&f.rwy_dep!=='-'?`<div style="font-size:11px;margin-bottom:3px"><span style="color:var(--text3)">DEP RWY Closed:</span> <span class="rwy-badge">${f.rwy_dep}</span></div>`:''}
+        ${f.rwy_arr&&f.rwy_arr!=='-'?`<div style="font-size:11px;margin-bottom:3px"><span style="color:var(--text3)">ARR RWY Closed:</span> <span class="rwy-badge">${f.rwy_arr}</span></div>`:''}
+        ${f.remark?`<div style="font-size:11px;color:var(--purple);margin-bottom:4px">${f.remark}</div>`:''}
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px">
+          <span>Check List</span><span style="color:${done===CHECKS.length?'var(--green)':'var(--text3)'}">${done}/${CHECKS.length}</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===CHECKS.length?'var(--green)':'var(--blue)'}"></div></div>
         <div class="cl-grid" id="cl-${i}"></div>
       </div>`;
     grid.appendChild(div);

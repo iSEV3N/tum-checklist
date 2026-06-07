@@ -1170,11 +1170,11 @@ function renderFAK(){
     const hasMel=[d.mel1,d.mel2,d.mel3].some(m=>m&&m.trim());
     const card=document.createElement('div');
     card.className='fak-card';
-    card.style.cssText=hasMel?'border-color:var(--amber);background:rgba(210,153,34,0.06)':'';
+    card.style.cssText=hasMel?'border-color:var(--amber);background:rgba(210,153,34,0.06)':''; card.setAttribute('data-fak-card', reg);
     card.innerHTML=`
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="fak-reg" style="font-size:18px;letter-spacing:1.5px">${reg}</div>
-        ${hasMel?`<span style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`:''}
+        ${hasMel?`<span data-fak-badge="${reg}" style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`:`<span data-fak-badge="${reg}" style="display:none;background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`}
       </div>
       <div style="margin-bottom:10px">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:5px">📦 FAK Limit</div>
@@ -1189,7 +1189,7 @@ function renderFAK(){
         <span style="color:var(--text3);font-size:11px;width:40px">No.${n+1}</span>
         <input class="mel-inp" style="flex:1;width:100%;font-size:13px;padding:6px 10px;color:${d[k]?'var(--amber)':'var(--text)'}"
           value="${d[k]||''}" placeholder="MEL-XXX-YY"
-          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; renderFAK_MELbadge(); saveState();">
+          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; saveState(); updateFAKCardHeader('${reg}');">
       </div>`).join('')}`;
     grid.appendChild(card);
   });
@@ -1226,8 +1226,23 @@ function editFAKLimit(reg) {
 }
 
 function renderFAK_MELbadge(){
-  // Re-render only FAK grid headers (badge active/inactive)
-  renderFAK();
+  // Lightweight: update only badge elements, no DOM re-render
+  Object.keys(fakData).forEach(function(reg){ updateFAKCardHeader(reg); });
+}
+
+function updateFAKCardHeader(reg) {
+  // Find badge element for this reg and update without re-rendering
+  var d = fakData[reg];
+  var hasMel = [d.mel1, d.mel2, d.mel3].some(function(m){ return m && m.trim(); });
+  var badges = document.querySelectorAll('[data-fak-badge="' + reg + '"]');
+  badges.forEach(function(el){
+    el.style.display = hasMel ? 'inline-block' : 'none';
+  });
+  var cards = document.querySelectorAll('[data-fak-card="' + reg + '"]');
+  cards.forEach(function(el){
+    el.style.borderColor = hasMel ? 'var(--amber)' : 'var(--border)';
+    el.style.background = hasMel ? 'rgba(210,153,34,0.06)' : '';
+  });
 }
 
 // ===================== PAYLOAD =====================

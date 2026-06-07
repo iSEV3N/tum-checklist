@@ -556,6 +556,7 @@ select.inp{cursor:pointer}
         <div class="form-row"><label>Plan A VIS</label><input class="inp" id="pm_avis" type="number" placeholder="Auto"></div>
         <div class="form-row"><label>Plan B DH</label><input class="inp" id="pm_bdh" type="number" placeholder="Auto"></div>
         <div class="form-row"><label>Plan B VIS</label><input class="inp" id="pm_bvis" type="number" placeholder="Auto"></div>
+        <input type="hidden" id="pm_insert_after" value="-1">
         <div class="form-actions">
           <button class="btn btn-danger btn-sm" id="deletePlanBtn" onclick="deletePlanRow()">🗑 ลบ</button>
           <button class="btn btn-outline btn-sm" onclick="closeModal('planModal')">ยกเลิก</button>
@@ -765,7 +766,19 @@ select.inp{cursor:pointer}
     <div class="form-row"><label>Sector</label>
       <select class="inp" id="e_sector"><option>1</option><option>2</option><option>3</option><option>4</option></select>
     </div>
-    <div class="form-row"><label>Crew Figure</label><input class="inp" id="e_crew_fig" placeholder="e.g. 3/2"></div>
+    <div class="form-row"><label>Crew Figure</label>
+      <select class="inp" id="e_crew_fig">
+        <option value="-">— (POS)</option>
+        <option value="2/0">2/0</option>
+        <option value="2/1">2/1</option>
+        <option value="2/2">2/2</option>
+        <option value="2/3">2/3</option>
+        <option value="3/0">3/0</option>
+        <option value="3/1">3/1</option>
+        <option value="3/2">3/2</option>
+        <option value="3/3">3/3</option>
+      </select>
+    </div>
     <div class="form-row"><label>PIC</label><input class="inp" id="e_pic" placeholder="ชื่อ Captain"></div>
     <div class="form-row"><label>F/O</label><input class="inp" id="e_fo" placeholder="ชื่อ First Officer"></div>
     <div class="form-row"><label>FDP (UTC)</label><input class="inp" id="e_fdp" placeholder="e.g. 00:25z"></div>
@@ -816,11 +829,12 @@ let checkState = {};
 
 // FAK/MEL editable data
 let fakData = {
-  'KMA/KMB': {fak:'L1=65 / L3=200', mel:'-', melNo:''},
-  'KMD':     {fak:'L1=35 / L2=30 / L4=200', mel:'-', melNo:''},
-  'KME':     {fak:'L1=35 / L2=30 / L4=200', mel:'-', melNo:''},
-  'KSA':     {fak:'510', mel:'25-20-01', melNo:''},
-  'KSB':     {fak:'509', mel:'-', melNo:''},
+  'KMA': {fak:'L1=65 / L3=200', mel1:'', mel2:'', mel3:''},
+  'KMB': {fak:'L1=65 / L3=200', mel1:'', mel2:'', mel3:''},
+  'KMD': {fak:'L1=35 / L2=30 / L4=200', mel1:'', mel2:'', mel3:''},
+  'KME': {fak:'L1=35 / L2=30 / L4=200', mel1:'', mel2:'', mel3:''},
+  'KSA': {fak:'510', mel1:'25-20-01', mel2:'', mel3:''},
+  'KSB': {fak:'509', mel1:'', mel2:'', mel3:''},
 };
 
 const normalChecks = {
@@ -1005,20 +1019,20 @@ function renderFlights(){
     const pct = Math.round(done/CHECKS.length*100);
     const isPos = f.reg==='-' || !f.reg || f.pic==='-' || !f.pic;
     const hasCrew = f.pic && f.pic!=='-' && f.pic.trim()!=='';
-    const regCol = isPos ? `<span class="tag tag-amber">POS</span>` : `<span class="tag tag-blue">${f.reg}</span>`;
+    const regCol = isPos
+      ? `<span style="background:rgba(210,153,34,0.15);border:1.5px solid var(--amber);border-radius:7px;padding:3px 10px;font-size:13px;font-family:var(--mono);color:var(--amber);font-weight:700;letter-spacing:1px">POS</span>`
+      : `<span style="background:rgba(88,166,255,0.15);border:2px solid var(--blue);border-radius:7px;padding:3px 12px;font-size:15px;font-family:var(--mono);color:var(--blue);font-weight:800;letter-spacing:1.5px">${f.reg}</span>`;
 
     // MEL lookup: match flight REG to fakData key
     // fakData keys: 'KMA/KMB', 'KMD', 'KME', 'KSA', 'KSB'
     function getMelForReg(reg) {
       if(!reg || reg==='-') return null;
-      for(const key of Object.keys(fakData)) {
-        if(key.split('/').includes(reg)) return fakData[key];
-      }
-      return null;
+      return fakData[reg] || null;
     }
     const fakEntry = getMelForReg(f.reg);
-    const hasMel = fakEntry && fakEntry.melNo && fakEntry.melNo.trim()!=='';
-    const melFromFAK = hasMel ? fakEntry.melNo : '';
+    const melFromFAK = fakEntry
+      ? [fakEntry.mel1, fakEntry.mel2, fakEntry.mel3].filter(Boolean).join(' | ')
+      : '';
     const melFromFlight = f.mel ? f.mel : '';
     const allMel = [melFromFAK, melFromFlight].filter(Boolean).join(' | ');
 
@@ -1146,18 +1160,28 @@ function renderFAK(){
   grid.innerHTML='';
   Object.keys(fakData).forEach(reg=>{
     const d=fakData[reg];
-    const card=document.createElement('div'); card.className='fak-card';
-    card.innerHTML=`<div class="fak-reg">${reg}</div>
-      <div class="fak-row"><span style="color:var(--text3)">FAK</span>
-        <input class="inp" style="font-size:11px;text-align:right;width:160px" value="${d.fak}" onchange="fakData['${reg}'].fak=this.value; saveState();">
+    const hasMel=[d.mel1,d.mel2,d.mel3].some(m=>m&&m.trim());
+    const card=document.createElement('div');
+    card.className='fak-card';
+    card.style.cssText=hasMel?'border-color:var(--amber);background:rgba(210,153,34,0.06)':'';
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="fak-reg" style="font-size:18px;letter-spacing:1.5px">${reg}</div>
+        ${hasMel?`<span style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`:''}
       </div>
-      <div class="fak-row"><span style="color:var(--text3)">MEL Status</span>
-        <input class="inp" style="font-size:11px;text-align:right;width:80px;color:${d.mel&&d.mel!=='-'?'var(--amber)':'var(--text)'}" 
-          value="${d.mel}" placeholder="Status/No." onchange="fakData['${reg}'].mel=this.value; saveState();">
+      <div class="fak-row">
+        <span style="color:var(--text3);font-size:11px">FAK Limit</span>
+        <input class="inp" style="font-size:12px;text-align:right;width:170px" value="${d.fak}"
+          onchange="fakData['${reg}'].fak=this.value; saveState();">
       </div>
-      <div class="fak-row"><span style="color:var(--text3)">MEL No.</span>
-        <input class="mel-inp" value="${d.melNo}" placeholder="MEL-XXX-YY" onchange="fakData['${reg}'].melNo=this.value; saveState();">
-      </div>`;
+      <div style="margin-top:8px;margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">MEL No. (สูงสุด 3 รายการ)</div>
+      ${['mel1','mel2','mel3'].map((k,n)=>`
+      <div class="fak-row" style="margin-bottom:4px">
+        <span style="color:var(--text3);font-size:11px;width:40px">No.${n+1}</span>
+        <input class="mel-inp" style="flex:1;width:100%;font-size:13px;padding:6px 10px;color:${d[k]?'var(--amber)':'var(--text)'}"
+          value="${d[k]||''}" placeholder="MEL-XXX-YY"
+          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; renderFAK_MELbadge(); saveState();">
+      </div>`).join('')}`;
     grid.appendChild(card);
   });
 
@@ -1179,6 +1203,12 @@ function renderFAK(){
     ab.innerHTML+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--text2)">${c}</div>`;
   });
   ab.innerHTML+='</div>';
+}
+
+
+function renderFAK_MELbadge(){
+  // Re-render only FAK grid headers (badge active/inactive)
+  renderFAK();
 }
 
 // ===================== PAYLOAD =====================
@@ -1369,36 +1399,40 @@ function renderPlanning(){
   var tbody = document.getElementById('planning-tbody');
   tbody.innerHTML = '';
   var lastAP = '';
+  var lastAPIdx = -1;
+
   planningData.forEach(function(r, i){
     var plan = r.plan || 'none';
     var st = PLAN_STYLES[plan] || PLAN_STYLES.none;
     var isFirstRow = r.ap && r.ap !== lastAP;
-    if(r.ap) lastAP = r.ap;
+    if(r.ap) { lastAP = r.ap; lastAPIdx = i; }
 
     var typeColor = r.type === 'ILS' ? 'tag-blue' : r.type === 'RNP' ? 'tag-purple' : 'tag-amber';
-
     var tr = document.createElement('tr');
     tr.style.cssText = st.row + 'transition:background 0.2s';
 
-    // Airport cell — only show for first runway of that airport
-    var apCell = isFirstRow
-      ? '<td style="' + st.ap + 'border-radius:6px 0 0 6px;padding:8px 10px;font-size:12px">' + (r.ap||'') + '</td>'
-      : '<td style="' + st.ap + 'padding:8px 10px;font-size:12px;opacity:0.4"></td>';
-
-    // ICAO — only show for first row of airport
-    var icaoCell = isFirstRow
-      ? '<td class="mono" style="' + st.ap + 'font-size:11px">' + (r.icao||'') + '</td>'
-      : '<td class="mono" style="' + st.ap + 'font-size:11px;opacity:0.4">' + (r.icao||'') + '</td>';
+    // Airport cell — first row shows name + ADD RWY button
+    var apCell, icaoCell;
+    if(isFirstRow){
+      apCell = '<td style="' + st.ap + 'border-radius:6px 0 0 6px;padding:7px 8px;font-size:13px;font-weight:600;vertical-align:top">' +
+        '<div>' + (r.ap||'') + '</div>' +
+        '<button onclick="addRwyToAirport(' + i + ')" style="margin-top:4px;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.3);border-radius:5px;color:var(--blue);font-size:10px;padding:2px 7px;cursor:pointer">+ RWY</button>' +
+        '</td>';
+      icaoCell = '<td class="mono" style="' + st.ap + 'font-size:12px;vertical-align:top;padding-top:9px">' + (r.icao||'') + '</td>';
+    } else {
+      apCell = '<td style="' + st.ap + 'padding:7px 8px;opacity:0.3"></td>';
+      icaoCell = '<td class="mono" style="' + st.ap + 'font-size:12px;opacity:0.3"></td>';
+    }
 
     tr.innerHTML = apCell + icaoCell +
-      '<td class="mono" style="font-size:11px">' + r.rwy + '</td>' +
+      '<td class="mono" style="font-size:12px">' + r.rwy + '</td>' +
       '<td><span class="tag ' + typeColor + '">' + r.type + '</span></td>' +
-      '<td class="mono" style="font-size:11px">' + r.dh + '</td>' +
-      '<td class="mono" style="font-size:11px">' + r.vis + '</td>' +
-      '<td class="mono" style="font-size:11px;' + st.cells + 'border-radius:4px;padding:5px 9px">' + r.planADh + '</td>' +
-      '<td class="mono" style="font-size:11px;' + st.cells + 'padding:5px 9px">' + r.planAVis + '</td>' +
-      '<td class="mono" style="font-size:11px;' + st.cellsB + 'border-radius:4px;padding:5px 9px">' + r.planBDh + '</td>' +
-      '<td class="mono" style="font-size:11px;' + st.cellsB + 'padding:5px 9px">' + r.planBVis + '</td>' +
+      '<td class="mono" style="font-size:12px">' + r.dh + '</td>' +
+      '<td class="mono" style="font-size:12px">' + r.vis + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cells + 'border-radius:4px;padding:5px 9px">' + r.planADh + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cells + 'padding:5px 9px">' + r.planAVis + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cellsB + 'border-radius:4px;padding:5px 9px">' + r.planBDh + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cellsB + 'padding:5px 9px">' + r.planBVis + '</td>' +
       '<td>' +
         '<select class="plan-select ' + st.badge + '" data-idx="' + i + '" onchange="setPlan(' + i + ',this.value,this)">' +
           '<option value="none"' + (plan==='none'?' selected':'') + '>— เลือก</option>' +
@@ -1407,11 +1441,47 @@ function renderPlanning(){
           '<option value="NA"' + (plan==='NA' ?' selected':'') + '>N/A ❌</option>' +
         '</select>' +
       '</td>' +
-      '<td style="text-align:center">' +
+      '<td style="text-align:center;white-space:nowrap">' +
         '<button onclick="openPlanModal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px 4px" title="แก้ไข">✏</button>' +
+        '<button onclick="deleteRwy(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:13px;padding:2px 4px" title="ลบ RWY นี้">🗑</button>' +
       '</td>';
     tbody.appendChild(tr);
   });
+}
+
+function addRwyToAirport(refIdx){
+  // Pre-fill modal with same airport info, blank runway
+  editingPlanIdx = -1;
+  var ref = planningData[refIdx];
+  document.getElementById('planModalTitle').textContent = '+ เพิ่ม RWY — ' + ref.ap;
+  document.getElementById('deletePlanBtn').style.display = 'none';
+  document.getElementById('pm_ap').value   = ref.ap;
+  document.getElementById('pm_icao').value  = ref.icao;
+  document.getElementById('pm_rwy').value   = '';
+  document.getElementById('pm_type').value  = 'ILS';
+  document.getElementById('pm_dh').value    = '';
+  document.getElementById('pm_vis').value   = '';
+  document.getElementById('pm_adh').value   = '';
+  document.getElementById('pm_avis').value  = '';
+  document.getElementById('pm_bdh').value   = '';
+  document.getElementById('pm_bvis').value  = '';
+  // Insert after the last row of same airport
+  var insertAfter = refIdx;
+  for(var j = refIdx; j < planningData.length; j++){
+    if(!planningData[j].ap || planningData[j].ap === ref.ap || planningData[j].ap === '') insertAfter = j;
+    else break;
+  }
+  document.getElementById('pm_insert_after').value = insertAfter || -1;
+  document.getElementById('planModal').classList.add('open');
+}
+
+function deleteRwy(i){
+  var r = planningData[i];
+  if(!confirm('ลบ ' + (r.ap||'') + ' ' + r.rwy + '?')) return;
+  // If this is the only runway of the airport, also remove it
+  planningData.splice(i, 1);
+  renderPlanning();
+  saveState();
 }
 
 function setPlan(i, val, el){
@@ -1446,7 +1516,8 @@ function openPlanModal(idx){
     document.getElementById('pm_bdh').value   = r.planBDh||'';
     document.getElementById('pm_bvis').value  = r.planBVis||'';
   } else {
-    ['pm_ap','pm_icao','pm_rwy','pm_dh','pm_vis','pm_adh','pm_avis','pm_bdh','pm_bvis'].forEach(function(id){
+    document.getElementById('pm_insert_after').value = -1;
+  ['pm_ap','pm_icao','pm_rwy','pm_dh','pm_vis','pm_adh','pm_avis','pm_bdh','pm_bvis'].forEach(function(id){
       document.getElementById(id).value = '';
     });
     document.getElementById('pm_type').value = 'ILS';
@@ -1471,8 +1542,16 @@ function savePlanRow(){
     planBVis: +document.getElementById('pm_bvis').value || vis+800,
     plan: editingPlanIdx === -1 ? 'none' : (planningData[editingPlanIdx].plan||'none'),
   };
-  if(editingPlanIdx === -1){ planningData.push(row); }
-  else { planningData[editingPlanIdx] = row; }
+  var insertAfter = parseInt(document.getElementById('pm_insert_after').value);
+  if(editingPlanIdx === -1){
+    if(insertAfter >= 0 && insertAfter < planningData.length - 1){
+      planningData.splice(insertAfter + 1, 0, row);
+    } else {
+      planningData.push(row);
+    }
+  } else {
+    planningData[editingPlanIdx] = row;
+  }
   closeModal('planModal');
   renderPlanning();
   saveState();
@@ -1529,6 +1608,7 @@ function saveState() {
       planningPlans: planningData.map(function(r){ return r.plan; }),
       fakData:       fakData,
       flights_mel:   flights.map(function(f){ return {mel: f.mel, remark: f.remark}; }),
+      fakData_saved: JSON.parse(JSON.stringify(fakData)),
     };
     localStorage.setItem(LS_KEY, JSON.stringify(state));
   } catch(e) {}
@@ -1558,9 +1638,10 @@ function loadState() {
     if (state.fakData) {
       Object.keys(state.fakData).forEach(function(reg){
         if (fakData[reg]) {
-          fakData[reg].fak   = state.fakData[reg].fak   || fakData[reg].fak;
-          fakData[reg].mel   = state.fakData[reg].mel   || fakData[reg].mel;
-          fakData[reg].melNo = state.fakData[reg].melNo || fakData[reg].melNo;
+          fakData[reg].fak  = state.fakData[reg].fak  || fakData[reg].fak;
+          fakData[reg].mel1 = state.fakData[reg].mel1 || state.fakData[reg].melNo || '';
+          fakData[reg].mel2 = state.fakData[reg].mel2 || '';
+          fakData[reg].mel3 = state.fakData[reg].mel3 || '';
         }
       });
     }

@@ -91,7 +91,7 @@ select.inp{cursor:pointer}
 .fc-head:hover{background:var(--bg3)}
 .fc-no{font-size:17px;font-weight:600;font-family:var(--mono);color:var(--blue)}
 .fc-route{font-size:15px;font-weight:500;margin-left:2px}
-.fc-times{font-size:12px;color:var(--text2);font-family:var(--mono);margin-left:auto}
+.fc-times{font-size:13px;color:var(--text);font-family:var(--mono);font-weight:600;margin-left:auto;letter-spacing:0.3px}
 .fc-body{padding:12px 14px}
 .fc-row{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin-bottom:8px;font-size:13px}
 .fc-label{color:var(--text3);font-size:12px}
@@ -165,6 +165,8 @@ select.inp{cursor:pointer}
     <div class="clock" id="clock">—</div>
     <div class="topbar-right">
       <span style="font-size:11px;color:var(--text3)">S26</span>
+      <button class="btn btn-sm btn-outline" onclick="exportUserData()" title="บันทึกข้อมูลก่อน Update">💾 Export</button>
+      <button class="btn btn-sm btn-outline" onclick="importUserData()" title="นำเข้าข้อมูลหลัง Update">📂 Import</button>
       <button class="btn btn-sm" id="install-btn" onclick="installApp()" style="display:none;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple);font-size:11px">📲 ติดตั้ง App</button>
       <button class="btn btn-sm" onclick="clearChecks()" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bg)">🗑 ล้าง Check</button>
       <button class="btn btn-blue btn-sm" onclick="openAddFlight()">+ เที่ยวบิน</button>
@@ -1050,7 +1052,7 @@ function renderFlights(){
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
           <span class="fc-no">8K${f.no}</span>
           ${regCol}
-          ${hasCrew ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.3);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--blue);white-space:nowrap">
+          ${hasCrew ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,166,255,0.15);border:2px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--blue);font-weight:600;white-space:nowrap">
             <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block"></span>
             ${f.pic}
           </span>` : ''}
@@ -1189,7 +1191,7 @@ function renderFAK(){
         <span style="color:var(--text3);font-size:11px;width:40px">No.${n+1}</span>
         <input class="mel-inp" style="flex:1;width:100%;font-size:13px;padding:6px 10px;color:${d[k]?'var(--amber)':'var(--text)'}"
           value="${d[k]||''}" placeholder="MEL-XXX-YY"
-          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; renderFAK_MELbadge(); saveState();">
+          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; saveState();" onblur="renderFAK_MELbadge();">
       </div>`).join('')}`;
     grid.appendChild(card);
   });
@@ -1720,6 +1722,93 @@ function loadState() {
       });
     }
   } catch(e) {}
+}
+
+
+// ===================== DATA EXPORT / IMPORT =====================
+function exportUserData(){
+  try {
+    var state = {
+      version: 3,
+      exported: new Date().toISOString(),
+      checkState: checkState,
+      planningPlans: planningData.map(function(r){ return r.plan; }),
+      fakData: JSON.parse(JSON.stringify(fakData)),
+      flights_data: flights.map(function(f){ return {
+        no:f.no, reg:f.reg, dep:f.dep, arr:f.arr, std:f.std, sta:f.sta,
+        sector:f.sector, crew_fig:f.crew_fig, pic:f.pic, fo:f.fo,
+        fdp:f.fdp, maxfdp:f.maxfdp, rwy_dep:f.rwy_dep, rwy_arr:f.rwy_arr,
+        mel:f.mel, remark:f.remark
+      };}),
+      planningData_all: planningData,
+    };
+    var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tum_data_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('Export error: ' + e.message); }
+}
+
+function importUserData(){
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var data = JSON.parse(ev.target.result);
+        // Restore checkState
+        if(data.checkState){
+          Object.keys(data.checkState).forEach(function(k){
+            checkState[k] = data.checkState[k];
+          });
+        }
+        // Restore planning plans
+        if(data.planningPlans){
+          data.planningPlans.forEach(function(p, i){
+            if(planningData[i]) planningData[i].plan = p || 'none';
+          });
+        }
+        // Restore full planningData if available
+        if(data.planningData_all && data.planningData_all.length > 0){
+          planningData.length = 0;
+          data.planningData_all.forEach(function(r){ planningData.push(r); });
+        }
+        // Restore fakData
+        if(data.fakData){
+          Object.keys(data.fakData).forEach(function(reg){
+            if(fakData[reg]){
+              var d = data.fakData[reg];
+              fakData[reg].fak  = d.fak  || fakData[reg].fak;
+              fakData[reg].mel1 = d.mel1 || d.melNo || '';
+              fakData[reg].mel2 = d.mel2 || '';
+              fakData[reg].mel3 = d.mel3 || '';
+            }
+          });
+        }
+        // Restore flight data (mel/remark per flight)
+        if(data.flights_data){
+          data.flights_data.forEach(function(fd, i){
+            if(flights[i]){
+              if(fd.mel)    flights[i].mel    = fd.mel;
+              if(fd.remark) flights[i].remark = fd.remark;
+            }
+          });
+        }
+        saveState();
+        renderFlights(); renderFAK(); renderPlanning();
+        alert('✅ นำเข้าข้อมูลสำเร็จ!');
+      } catch(err) { alert('❌ ไฟล์ไม่ถูกต้อง: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 // ===================== INIT =====================

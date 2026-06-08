@@ -155,6 +155,13 @@ select.inp{cursor:pointer}
 .fak-reg{font-size:16px;font-weight:600;font-family:var(--mono);color:var(--blue);margin-bottom:6px}
 .fak-row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;border-bottom:1px solid var(--border)}
 .fak-row:last-child{border-bottom:none}
+
+/* ===== METEOROLOGY PAGE ===== */
+.meteo-tab{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 11px;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.12s;white-space:nowrap}
+.meteo-tab:hover{background:var(--bg4);color:var(--text)}
+.meteo-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
+.meteo-pane{display:none}
+.meteo-pane.active{display:block}
 </style>
 </head>
 <body>
@@ -184,6 +191,7 @@ select.inp{cursor:pointer}
     <div class="nav-item" onclick="nav('dispatch',this)">🗺 &nbsp;Dispatch</div>
     <div class="nav-sec">Study</div>
     <div class="nav-item" onclick="nav('nav_aids',this)">🛰 &nbsp;NAV AIDs</div>
+    <div class="nav-item" onclick="nav('meteo',this)">🌩 &nbsp;อุตุนิยมวิทยา</div>
     <div class="nav-item" onclick="nav('pnr',this)">⛽ &nbsp;PNR / Fuel</div>
   </div>
 
@@ -755,6 +763,467 @@ select.inp{cursor:pointer}
         </div>
       </div>
     </div>
+
+    <!-- ===== METEOROLOGY ===== -->
+    <div class="page" id="page-meteo">
+      <div class="page-hd">อุตุนิยมวิทยาการบิน</div>
+      <div class="page-sub">Aviation Meteorology — ข้อมูลสำคัญสำหรับ Flight Dispatcher / นักอุตุฯ / นักบิน</div>
+
+      <!-- TAB BAR -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="meteo-tab active" id="mtab-theory" onclick="showMTab('theory',this)">☁ ทฤษฎีอากาศ</button>
+        <button class="meteo-tab" id="mtab-metar" onclick="showMTab('metar',this)">📋 METAR</button>
+        <button class="meteo-tab" id="mtab-taf" onclick="showMTab('taf',this)">📅 TAF</button>
+        <button class="meteo-tab" id="mtab-sigmet" onclick="showMTab('sigmet',this)">⚡ SIGMET/AIRMET</button>
+        <button class="meteo-tab" id="mtab-pirep" onclick="showMTab('pirep',this)">✈ PIREP</button>
+        <button class="meteo-tab" id="mtab-wxcodes" onclick="showMTab('wxcodes',this)">🔤 WX Codes</button>
+        <button class="meteo-tab" id="mtab-isobar" onclick="showMTab('isobar',this)">🗺 Isobar</button>
+        <button class="meteo-tab" id="mtab-hazard" onclick="showMTab('hazard',this)">⚠ Hazards</button>
+      </div>
+
+      <!-- THEORY -->
+      <div class="meteo-pane active" id="mpane-theory">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">☁ Cloud Types & Aviation Impact</div>
+              <table><thead><tr><th>ประเภท</th><th>ความสูง</th><th>ผลต่อการบิน</th><th>ระวัง</th></tr></thead>
+              <tbody>
+                <tr><td><b>Cumulonimbus (CB)</b></td><td>ทุกระดับ</td><td>SEV Turb, Lightning, Hail, Icing, Microburst</td><td><span class="tag tag-red">AVOID</span></td></tr>
+                <tr><td>Cumulus (TCU)</td><td>Low–Mid</td><td>Moderate Turb, Heavy Rain</td><td><span class="tag tag-amber">CAUTION</span></td></tr>
+                <tr><td>Stratus/Nimbostratus</td><td>Low</td><td>IFR, Drizzle, Freezing</td><td><span class="tag tag-amber">IFR</span></td></tr>
+                <tr><td>Cirrus/Cirrostratus</td><td>High &gt;20,000ft</td><td>ทัศนวิสัยดี Ice Crystals</td><td><span class="tag tag-blue">LOW</span></td></tr>
+                <tr><td>Altostratus</td><td>Mid</td><td>Moderate Icing</td><td><span class="tag tag-amber">ICING</span></td></tr>
+                <tr><td>Fog/Mist</td><td>Surface</td><td>VIS ต่ำ อาจปิดสนาม</td><td><span class="tag tag-red">LOW VIS</span></td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🌀 Turbulence Intensity</div>
+              <table><thead><tr><th>ระดับ</th><th>ลักษณะ</th><th>ผลกระทบ</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tag tag-blue">Light</span></td><td>สั่นเล็กน้อย</td><td>ผู้โดยสารรู้สึกนิดหน่อย</td></tr>
+                <tr><td><span class="tag tag-green">Moderate</span></td><td>สั่นชัดเจน</td><td>ควรใส่ Seat belt</td></tr>
+                <tr><td><span class="tag tag-amber">Severe</span></td><td>สั่นรุนแรง ควบคุมยาก</td><td>เปลี่ยนเส้นทาง/ระดับบิน</td></tr>
+                <tr><td><span class="tag tag-red">Extreme</span></td><td>ควบคุมไม่ได้</td><td>Emergency</td></tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.9">
+                <b style="color:var(--text)">แหล่งที่มา:</b> CAT (Jet Stream) | Mechanical (ภูเขา) | Convective (CB) | Wind Shear
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🧊 Icing</div>
+              <table><thead><tr><th>ประเภท</th><th>เงื่อนไข</th><th>อันตราย</th></tr></thead>
+              <tbody>
+                <tr><td><b>Clear Ice</b></td><td>0°C ถึง −10°C, Freezing Rain</td><td><span class="tag tag-red">สูงสุด</span></td></tr>
+                <tr><td><b>Rime Ice</b></td><td>−10°C ถึง −20°C</td><td><span class="tag tag-amber">ปานกลาง</span></td></tr>
+                <tr><td><b>Mixed Ice</b></td><td>ผสมทั้งสองแบบ</td><td><span class="tag tag-red">สูง</span></td></tr>
+              </tbody></table>
+              <div style="margin-top:6px;font-size:12px;color:var(--text2)">ผลกระทบ: Lift ลด Drag เพิ่ม Stall Speed สูง Engine Surge</div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🌡 Atmosphere & ISA</div>
+              <table><thead><tr><th>Layer</th><th>ระดับ</th><th>ลักษณะ</th></tr></thead>
+              <tbody>
+                <tr><td><b>Troposphere</b></td><td>0–12 km</td><td>Temp ลด ~2°C/1,000ft อากาศทั้งหมดอยู่ที่นี่</td></tr>
+                <tr><td><b>Tropopause</b></td><td>~FL360</td><td>Jet Stream, CAT, Temp −56.5°C</td></tr>
+                <tr><td><b>Stratosphere</b></td><td>&gt;FL400</td><td>ไม่มีสภาพอากาศ Temp เพิ่ม</td></tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:8px;line-height:1.9">
+                ISA: 15°C at MSL | Lapse Rate: −2°C/1,000ft | Tropopause: −56.5°C<br>
+                <b>ΔISA</b> = OAT − ISA Temp | ISA+10 → DA สูง → Performance แย่
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">💨 Wind Shear & Microburst</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">Wind Shear</b> — ลมเปลี่ยนกะทันหัน อันตราย &lt;1,500ft AGL<br>
+                <b style="color:var(--red)">Microburst</b> — Downdraft รุนแรง &lt;4km 5–15 นาที 60+ kt<br>
+                <b style="color:var(--amber)">Action:</b> Approach → Missed Approach ทันที<br>
+                <b>ตรวจจับ:</b> LLWAS, Doppler Radar, PIREP
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🌏 SE Asia Monsoon</div>
+              <table><thead><tr><th>ฤดูกาล</th><th>ช่วงเวลา</th><th>ผลต่อ Ops</th></tr></thead>
+              <tbody>
+                <tr><td><b>SW Monsoon</b></td><td>พ.ค.–ต.ค.</td><td>CB ชุก VIS ต่ำตอนเย็น Extra Fuel</td></tr>
+                <tr><td><b>NE Monsoon</b></td><td>พ.ย.–มี.ค.</td><td>แห้ง ทัศนวิสัยดี Ops ปกติ</td></tr>
+                <tr><td><b>Transition</b></td><td>เม.ย., ต.ค.–พ.ย.</td><td>อากาศแปรปรวน CB Cluster</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METAR -->
+      <div class="meteo-pane" id="mpane-metar">
+        <div class="card">
+          <div class="card-title">📋 METAR Decoder</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-family:var(--mono);font-size:12px;line-height:2.2;overflow-x:auto;white-space:nowrap">
+            <span style="color:var(--blue)">METAR</span> <span style="color:var(--amber)">VTBS</span> <span style="color:var(--green)">081200Z</span> <span style="color:var(--purple)">15012G20KT 120V180</span> <span style="color:var(--teal)">9999</span> <span style="color:var(--red)">TSRA</span> <span style="color:var(--amber)">SCT020CB BKN040</span> <span style="color:var(--red)">28/23</span> <span style="color:var(--blue)">Q1010</span> <span style="color:var(--text2)">NOSIG</span>
+          </div>
+          <table><thead><tr><th>Field</th><th>ตัวอย่าง</th><th>ความหมาย</th><th>หมายเหตุ</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="color:var(--blue)">Type</td><td class="mono">METAR/SPECI</td><td>รายงานปกติ/พิเศษ</td><td>SPECI=อากาศเปลี่ยนรุนแรง</td></tr>
+            <tr><td class="mono" style="color:var(--amber)">Station</td><td class="mono">VTBS</td><td>ICAO 4 ตัว</td><td>ไม่ใช่ IATA</td></tr>
+            <tr><td class="mono" style="color:var(--green)">Time</td><td class="mono">081200Z</td><td>วัน08 12:00 UTC</td><td>Z = UTC เสมอ</td></tr>
+            <tr><td class="mono" style="color:var(--purple)">Wind</td><td class="mono">15012G20KT</td><td>ทิศ150° 12kt Gust 20kt</td><td>VRB=แปรปรวน 120V180=variation</td></tr>
+            <tr><td class="mono" style="color:var(--teal)">VIS</td><td class="mono">9999</td><td>≥10 km</td><td>0000=&lt;50m CAVOK=VIS≥10km ไม่มีเมฆ&lt;5000ft</td></tr>
+            <tr><td class="mono">RVR</td><td class="mono">R28/0600</td><td>Runway Visual Range</td><td>P=&gt;max M=&lt;min</td></tr>
+            <tr><td class="mono" style="color:var(--red)">WX</td><td class="mono">TSRA/-RA/+SN</td><td>TS+Rain/Light Rain/Heavy Snow</td><td>–Light (blank)Mod +Heavy VC=Vicinity</td></tr>
+            <tr><td class="mono" style="color:var(--amber)">Cloud</td><td class="mono">SCT020CB</td><td>Scattered 2,000ft CB</td><td>FEW=1-2 SCT=3-4 BKN=5-7 OVC=8/8</td></tr>
+            <tr><td class="mono" style="color:var(--red)">Temp</td><td class="mono">28/23</td><td>OAT/Dew Point °C</td><td>M=Minus เช่น M05</td></tr>
+            <tr><td class="mono" style="color:var(--blue)">QNH</td><td class="mono">Q1010</td><td>1010 hPa</td><td>A=inHg (US) เช่น A2992</td></tr>
+            <tr><td class="mono">Trend</td><td class="mono">NOSIG/TEMPO/BECMG</td><td>ไม่เปลี่ยน/ชั่วคราว/ถาวร</td><td>Forecast 2 ชม.ข้างหน้า</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-title">☁ Cloud Oktas & CAVOK</div>
+          <table><thead><tr><th>Code</th><th>Oktas</th><th>ความหมาย</th><th>Ceiling?</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">SKC/NSC</td><td class="mono">0/8</td><td>ท้องฟ้าโล่ง</td><td><span class="tag tag-green">ไม่ใช่</span></td></tr>
+            <tr><td class="mono">FEW</td><td class="mono">1–2/8</td><td>เมฆน้อย</td><td><span class="tag tag-green">ไม่ใช่</span></td></tr>
+            <tr><td class="mono">SCT</td><td class="mono">3–4/8</td><td>เมฆกระจาย</td><td><span class="tag tag-green">ไม่ใช่</span></td></tr>
+            <tr><td class="mono">BKN</td><td class="mono">5–7/8</td><td>เมฆมาก</td><td><span class="tag tag-red">= Ceiling ✓</span></td></tr>
+            <tr><td class="mono">OVC</td><td class="mono">8/8</td><td>ปกคลุมทั้งหมด</td><td><span class="tag tag-red">= Ceiling ✓</span></td></tr>
+            <tr><td class="mono">VV</td><td class="mono">—</td><td>Vertical Visibility</td><td><span class="tag tag-red">= Ceiling ✓</span></td></tr>
+          </tbody></table>
+          <div style="margin-top:8px;padding:10px;background:var(--green-bg);border:1px solid var(--green);border-radius:7px;font-size:12px;color:var(--text2);line-height:2">
+            <b style="color:var(--green)">CAVOK</b> = VIS ≥ 10km + ไม่มีเมฆ &lt; 5,000ft หรือ MSA + ไม่มี CB/TCU + ไม่มี Significant WX
+          </div>
+        </div>
+      </div>
+
+      <!-- TAF -->
+      <div class="meteo-pane" id="mpane-taf">
+        <div class="card">
+          <div class="card-title">📅 TAF Decoder</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-family:var(--mono);font-size:11px;line-height:2.2;overflow-x:auto;white-space:nowrap">
+            <span style="color:var(--blue)">TAF</span> <span style="color:var(--amber)">VTBS</span> <span style="color:var(--green)">081100Z 0812/0918</span> <span style="color:var(--purple)">14010KT</span> <span style="color:var(--teal)">9999</span> <span style="color:var(--amber)">FEW030</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--amber)">BECMG</span> <span style="color:var(--green)">0814/0816</span> <span style="color:var(--red)">TSRA SCT020CB BKN040</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue)">TEMPO</span> <span style="color:var(--green)">0820/0900</span> <span style="color:var(--teal)">2000</span> <span style="color:var(--red)">+TSRA OVC015CB</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue)">PROB30 TEMPO</span> <span style="color:var(--green)">0902/0906</span> <span style="color:var(--teal)">0800</span> <span style="color:var(--red)">FG</span>
+          </div>
+          <table><thead><tr><th>Keyword</th><th>ตัวอย่าง</th><th>ความหมาย</th><th>Dispatcher Note</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Validity</td><td class="mono">0812/0918</td><td>วัน08 12z→วัน09 18z (30ชม.)</td><td>ดูช่วง ETA ± 1 ชม.</td></tr>
+            <tr><td class="mono" style="color:var(--amber)">BECMG</td><td class="mono">BECMG 0814/0816</td><td>เปลี่ยนถาวรในช่วง 14z–16z</td><td>หลัง BECMG สิ้นสุดอากาศเปลี่ยนแล้ว</td></tr>
+            <tr><td class="mono" style="color:var(--blue)">TEMPO</td><td class="mono">TEMPO 0820/0900</td><td>เปลี่ยนชั่วคราว &lt;60 นาที ≥50%</td><td>VIS ต่ำกว่า Min → พิจารณา Alternate</td></tr>
+            <tr><td class="mono">PROB40</td><td class="mono">PROB40 TEMPO</td><td>โอกาส 40%</td><td>ต้องนำมา Planning</td></tr>
+            <tr><td class="mono">PROB30</td><td class="mono">PROB30</td><td>โอกาส 30%</td><td>ระวัง ไม่ต้อง Plan</td></tr>
+            <tr><td class="mono">FM</td><td class="mono">FM081600</td><td>จาก 16z เปลี่ยนทันที</td><td>แทนที่ทุก element ก่อนหน้า</td></tr>
+            <tr><td class="mono">NSW</td><td class="mono">NSW</td><td>No Significant Weather</td><td>WX หายหลัง TEMPO/BECMG</td></tr>
+          </tbody></table>
+          <div style="margin-top:10px;background:var(--amber-bg);border:1px solid var(--amber);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);line-height:2">
+            <b style="color:var(--amber)">⚠ Dispatcher Rules:</b> ดู TAF ที่ ETA ± 1 ชม. เสมอ | TEMPO/PROB40 VIS ต่ำกว่า Min → Alternate | Flight &gt;6ชม. → ดู GAMET/SIGMET เพิ่ม
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGMET/AIRMET -->
+      <div class="meteo-pane" id="mpane-sigmet">
+        <div class="sec-grid">
+          <div class="card">
+            <div class="card-title">⚡ SIGMET</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">ออกโดย MWO — แจ้งอากาศอันตรายต่อเครื่องบินทุกประเภท</div>
+            <table><thead><tr><th>ประเภท</th><th>Code</th><th>ความหมาย</th><th>Validity</th></tr></thead>
+            <tbody>
+              <tr><td>Thunderstorm</td><td class="mono">OBSC TS / EMBD TS</td><td>CB มองไม่เห็น / ฝังในเมฆ</td><td>4 ชม.</td></tr>
+              <tr><td>Severe Turbulence</td><td class="mono">SEV TURB</td><td>Turbulence รุนแรง</td><td>4 ชม.</td></tr>
+              <tr><td>Severe Icing</td><td class="mono">SEV ICE</td><td>Icing รุนแรง</td><td>4 ชม.</td></tr>
+              <tr><td>Mountain Wave</td><td class="mono">SEV MTW</td><td>Mountain Wave รุนแรง</td><td>4 ชม.</td></tr>
+              <tr><td><b style="color:var(--red)">Volcanic Ash</b></td><td class="mono">VA</td><td>เถ้าถ่านภูเขาไฟ Engine ดับได้</td><td>6 ชม.</td></tr>
+              <tr><td><b style="color:var(--red)">Tropical Cyclone</b></td><td class="mono">TC</td><td>พายุหมุนเขตร้อน</td><td>6 ชม.</td></tr>
+            </tbody></table>
+            <div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:8px;line-height:1.9">
+              Location: <span class="mono">WI</span>=Within | <span class="mono">MOV</span>=Moving | <span class="mono">NC</span>=No Change | <span class="mono">INTSF</span>=Intensifying | <span class="mono">WKN</span>=Weakening
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🌤 AIRMET</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">ระดับต่ำกว่า SIGMET สำหรับ Low-level Ops (&lt;FL100)</div>
+            <table><thead><tr><th>ประเภท</th><th>เงื่อนไข</th></tr></thead>
+            <tbody>
+              <tr><td>IFR</td><td>Ceiling &lt;1000ft หรือ VIS &lt;3SM</td></tr>
+              <tr><td>Turbulence</td><td>Moderate Turbulence</td></tr>
+              <tr><td>Icing</td><td>Moderate Icing</td></tr>
+              <tr><td>LLWS</td><td>Low-level Wind Shear</td></tr>
+              <tr><td>Mountain Obscuration</td><td>ภูเขาถูกเมฆปกคลุม</td></tr>
+            </tbody></table>
+            <div style="margin-top:10px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:8px;padding:10px;font-size:12px;color:var(--text2);line-height:2">
+              <b style="color:var(--blue)">Dispatcher:</b> ตรวจ SIGMET ครอบ FIR ที่บินผ่านทั้งหมด | VA → ห้ามบินผ่านเด็ดขาด | TC → หลีกเลี่ยง 100+ NM
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIREP -->
+      <div class="meteo-pane" id="mpane-pirep">
+        <div class="card">
+          <div class="card-title">✈ PIREP — Pilot Report</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-family:var(--mono);font-size:11px;line-height:2;overflow-x:auto;white-space:nowrap">
+            UA /OV <span style="color:var(--amber)">VTBS090030</span> /TM <span style="color:var(--green)">1145</span> /FL <span style="color:var(--blue)">310</span> /TP <span style="color:var(--teal)">B744</span><br>
+            /SK <span style="color:var(--amber)">BKN045-TOP065</span> /WX <span style="color:var(--red)">TSRA</span> /TB <span style="color:var(--red)">SEV</span> /IC <span style="color:var(--red)">SEV RIME</span> /RM SEVERE ICING AND TURBULENCE
+          </div>
+          <table><thead><tr><th>Field</th><th>Code</th><th>ความหมาย</th><th>ค่าที่เป็นไปได้</th></tr></thead>
+          <tbody>
+            <tr><td>Location</td><td class="mono">/OV</td><td>ตำแหน่ง</td><td>VTBS090030 = 090°/30NM จาก VTBS</td></tr>
+            <tr><td>Time</td><td class="mono">/TM</td><td>เวลา UTC HHMM</td><td>1145 = 11:45z</td></tr>
+            <tr><td>Flight Level</td><td class="mono">/FL</td><td>ระดับบิน</td><td>FL310 = 31,000ft</td></tr>
+            <tr><td>Aircraft</td><td class="mono">/TP</td><td>ประเภท AC</td><td>B744, A333, B738</td></tr>
+            <tr><td>Turbulence</td><td class="mono">/TB</td><td>ระดับ</td><td>LGT / MDT / SEV / EXTRM + CONT/INTMT/OCNL</td></tr>
+            <tr><td>Icing</td><td class="mono">/IC</td><td>ระดับ</td><td>LGT / MDT / SEV + RIME / CLR / MIXED</td></tr>
+            <tr><td>Wind</td><td class="mono">/WV</td><td>ลมที่ระดับบิน</td><td>27045KT</td></tr>
+          </tbody></table>
+          <div style="margin-top:8px;padding:8px;background:var(--green-bg);border:1px solid var(--green);border-radius:7px;font-size:12px;color:var(--text2)">
+            <b style="color:var(--green)">UA</b> = Routine PIREP | <b>UUA</b> = Urgent (SEV Turb/Icing/TS/Hail) — Dispatcher แจ้ง Crew ก่อน Departure
+          </div>
+        </div>
+      </div>
+
+      <!-- WX CODES from image -->
+      <div class="meteo-pane" id="mpane-wxcodes">
+        <div class="card">
+          <div class="card-title">🔤 Weather Codes and Symbols (ICAO Annex 3)</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th colspan="2" style="background:rgba(88,166,255,0.15);color:var(--blue);text-align:center">QUALIFIER</th>
+                  <th colspan="3" style="background:rgba(63,185,80,0.12);color:var(--green);text-align:center">WEATHER PHENOMENA</th>
+                </tr>
+                <tr><th>Intensity</th><th>Descriptor</th><th>Precipitation</th><th>Obscuration</th><th>Other</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="vertical-align:top;line-height:2.2">
+                    <span class="mono" style="color:var(--blue)">–</span> Light<br>
+                    <span style="color:var(--text3);font-size:11px">(blank)</span> Moderate<br>
+                    <span class="mono" style="color:var(--red)">+</span> Heavy<br>
+                    <span class="mono" style="color:var(--amber)">VC</span> Vicinity
+                  </td>
+                  <td style="vertical-align:top;line-height:2.2">
+                    <span class="mono">MI</span> Shallow<br><span class="mono">BC</span> Patches<br>
+                    <span class="mono">DR</span> Low Drifting<br><span class="mono">BL</span> Blowing<br>
+                    <span class="mono">SH</span> Shower(s)<br><span class="mono">TS</span> Thunderstorm<br>
+                    <span class="mono">FZ</span> Freezing<br><span class="mono">PR</span> Partial
+                  </td>
+                  <td style="vertical-align:top;line-height:2.2">
+                    <span class="mono">DZ</span> Drizzle<br><span class="mono">RA</span> Rain<br>
+                    <span class="mono">SN</span> Snow<br><span class="mono">SG</span> Snow grains<br>
+                    <span class="mono">IC</span> Ice crystals<br><span class="mono">PL</span> Ice Pellets<br>
+                    <span class="mono">GR</span> Hail<br><span class="mono">GS</span> Small hail/Snow pellets
+                  </td>
+                  <td style="vertical-align:top;line-height:2.2">
+                    <span class="mono">BR</span> Mist<br><span class="mono">FG</span> Fog<br>
+                    <span class="mono">FU</span> Smoke<br><span class="mono">VA</span> Volcanic ash<br>
+                    <span class="mono">DU</span> Dust (widespread)<br><span class="mono">SA</span> Sand<br>
+                    <span class="mono">HZ</span> Haze
+                  </td>
+                  <td style="vertical-align:top;line-height:2.2">
+                    <span class="mono">PO</span> Dust/Sand whirls<br><span class="mono">SQ</span> Squalls<br>
+                    <span class="mono">FC</span> Funnel cloud(s)<br>
+                    <span style="font-size:11px;color:var(--text3)">(tornado/waterspout)</span><br>
+                    <span class="mono">SS</span> Sandstorm<br><span class="mono">DS</span> Duststorm
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">⛈ Significant Weather Symbols</div>
+          <table><thead><tr><th>Symbol</th><th>ความหมาย</th><th>Symbol</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span style="font-size:20px;color:var(--red)">⚡⚡</span></td><td><b>Severe Icing</b></td>
+              <td><span style="font-size:20px;color:var(--amber)">⚡</span></td><td><b>Moderate Icing</b></td>
+            </tr>
+            <tr>
+              <td><span style="font-size:20px;color:var(--red)">∧∧</span></td><td><b>Severe Turbulence</b></td>
+              <td><span style="font-size:20px;color:var(--amber)">∧</span></td><td><b>Moderate Turbulence</b></td>
+            </tr>
+            <tr>
+              <td><span style="font-size:22px">🌀</span></td><td><b>Tropical Cyclone</b></td>
+              <td><span style="font-size:22px">🌋</span></td><td><b>Volcano</b></td>
+            </tr>
+            <tr>
+              <td><div style="border:2px solid var(--text2);display:inline-flex;align-items:center;justify-content:center;width:38px;height:28px;font-size:11px;font-weight:700;color:var(--blue)">280<br><span style="font-size:8px">▽</span></div></td>
+              <td><b>Tropopause Low</b> FL280</td>
+              <td><div style="border:2px solid var(--text2);display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;font-size:12px;font-weight:700">450</div></td>
+              <td><b>Tropopause Height</b> FL450</td>
+            </tr>
+          </tbody></table>
+          <div class="card" style="margin-top:10px">
+            <div class="card-title">💨 Wind Barbs</div>
+            <table><thead><tr><th>Symbol</th><th>ความหมาย</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">— \</td><td><b>Short feather = 5 knots</b></td></tr>
+              <tr><td class="mono">— |</td><td><b>Long feather = 10 knots</b></td></tr>
+              <tr><td class="mono">— ▲</td><td><b>Triangle = 50 knots</b></td></tr>
+              <tr><td class="mono">วงกลมเปิด</td><td>Calm (ลมสงบ)</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ISOBAR -->
+      <div class="meteo-pane" id="mpane-isobar">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">🗺 Isobar & ระบบความกดอากาศ</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">Isobar</b> — เส้นเชื่อมบริเวณที่มีความกดอากาศเท่ากัน (hPa) | วาดทุก 4 hPa บน SIGWX<br>
+                <b style="color:var(--text)">Pressure Gradient</b> = ΔP/ΔDistance | Isobar ถี่ = Gradient สูง = ลมแรง
+              </div>
+              <table><thead><tr><th>ลักษณะ</th><th>ความหมาย</th><th>ผลต่อการบิน</th></tr></thead>
+              <tbody>
+                <tr><td><b>เส้นถี่</b></td><td>Pressure Gradient สูง</td><td>ลมแรง Wind Shear Turb → Extra Fuel</td></tr>
+                <tr><td><b>เส้นห่าง</b></td><td>Pressure Gradient ต่ำ</td><td>ลมอ่อน Fuel ปกติ</td></tr>
+                <tr><td><b>Kink (หักมุม)</b></td><td>ตำแหน่ง Front</td><td>WX เปลี่ยนฉับพลัน</td></tr>
+                <tr><td><b>ปิดรอบ H</b></td><td>High Pressure</td><td>อากาศดี ท้องฟ้าแจ่ม</td></tr>
+                <tr><td><b>ปิดรอบ L</b></td><td>Low Pressure</td><td>เมฆมาก ฝน Turb</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🌬 Buys Ballot's Law</div>
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">Northern Hemisphere:</b><br>
+                "หันหลังให้ลม — <b style="color:var(--red)">Low</b> อยู่ทางซ้าย <b style="color:var(--blue)">High</b> อยู่ทางขวา"<br><br>
+                <b style="color:var(--amber)">ประโยชน์สำหรับ Dispatcher:</b><br>
+                • บินรอบ High ด้านขวา → ได้ Tailwind<br>
+                • หลีกเลี่ยง Low → Headwind + WX แย่<br>
+                Southern Hemisphere: ทิศกลับกัน
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🌡 Altimeter Settings</div>
+              <table><thead><tr><th>Setting</th><th>Reference</th><th>ใช้สำหรับ</th><th>0 ft ที่</th></tr></thead>
+              <tbody>
+                <tr><td><b style="color:var(--blue)">QNH</b></td><td class="mono">hPa จริง</td><td>AMSL Altitude</td><td>MSL</td></tr>
+                <tr><td><b style="color:var(--green)">QFE</b></td><td class="mono">hPa ที่สนาม</td><td>AGL ความสูงเหนือสนาม</td><td>Aerodrome</td></tr>
+                <tr><td><b style="color:var(--amber)">QNE/STD</b></td><td class="mono">1013.25 hPa</td><td>Flight Level</td><td>Standard Datum</td></tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.9">
+                TA (ไทย) = 11,000ft — เปลี่ยน QNH→STD ขาขึ้น | TL — เปลี่ยน STD→QNH ขาลง
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">⬆⬇ High / Low Pressure</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+                <div style="background:var(--blue-bg);border:1px solid var(--blue);border-radius:8px;padding:10px">
+                  <b style="color:var(--blue)">High (H) Anticyclone</b>
+                  <div style="color:var(--text2);margin-top:5px;line-height:2">ลมตามเข็ม (N.Hemi.)<br>อากาศจมลง<br>ท้องฟ้าแจ่ม ✅ ปลอดภัย</div>
+                </div>
+                <div style="background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:10px">
+                  <b style="color:var(--red)">Low (L) Cyclone</b>
+                  <div style="color:var(--text2);margin-top:5px;line-height:2">ลมทวนเข็ม (N.Hemi.)<br>อากาศลอยขึ้น<br>เมฆมาก ฝน Turb ⚠</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📊 Density Altitude</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1">
+                <span style="color:var(--red);font-family:var(--mono)">DA = PA + 120 × (OAT − ISA Temp)</span><br>
+                ตัวอย่าง FL100: ISA=−5°C | OAT=+15°C<br>
+                DA = 10,000 + 120×20 = <b style="color:var(--amber)">12,400ft</b><br><br>
+                DA สูง → Thrust ลด → Lift ลด → Runway ยาวขึ้น
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🌍 Frontal Weather Impact</div>
+              <table><thead><tr><th>Front</th><th>ก่อนผ่าน</th><th>ขณะผ่าน</th><th>หลังผ่าน</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span style="color:#3b82f6;font-weight:700">Cold Front</span></td>
+                  <td>อบอุ่น Pressure ลด</td><td>CB ฝนหนัก Wind Shift Turb</td><td>เย็น VIS ดี</td>
+                </tr>
+                <tr>
+                  <td><span style="color:#ef4444;font-weight:700">Warm Front</span></td>
+                  <td>Cirrus ก่อน Ceiling ลด</td><td>Stratus Low VIS Drizzle</td><td>อบอุ่น VIS ดีขึ้น</td>
+                </tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HAZARDS -->
+      <div class="meteo-pane" id="mpane-hazard">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">⚠ Weather Hazards Quick Reference</div>
+              <table><thead><tr><th>Hazard</th><th>ผลต่อเครื่องบิน</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td><b style="color:var(--red)">CB/Thunderstorm</b></td><td>SEV Turb Lightning Hail Icing Microburst</td><td><span class="tag tag-red">AVOID 20NM</span></td></tr>
+                <tr><td><b style="color:var(--amber)">CAT</b></td><td>SEV Turb ไม่มีสัญญาณ</td><td><span class="tag tag-amber">ขอ PIREP</span></td></tr>
+                <tr><td><b style="color:var(--red)">Volcanic Ash</b></td><td>Engine Flame Out Pitot Block</td><td><span class="tag tag-red">AVOID ทุกกรณี</span></td></tr>
+                <tr><td><b style="color:var(--amber)">Fog/Low VIS</b></td><td>VIS ต่ำกว่า Landing Min</td><td><span class="tag tag-amber">Alternate Required</span></td></tr>
+                <tr><td><b style="color:var(--blue)">Severe Icing</b></td><td>Lift ลด Drag เพิ่ม Stall สูง</td><td><span class="tag tag-red">เปลี่ยน FL</span></td></tr>
+                <tr><td><b style="color:var(--purple)">Microburst</b></td><td>Loss of Lift and Control</td><td><span class="tag tag-red">Missed Approach ทันที</span></td></tr>
+                <tr><td><b style="color:var(--red)">Tropical Cyclone</b></td><td>Extreme Winds Heavy Rain</td><td><span class="tag tag-red">AVOID 100+ NM</span></td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🎨 Weather Radar Colors</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(86,211,100,0.08);border:1px solid rgba(86,211,100,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#4ade80;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#4ade80">ฟ้า/เขียว (15–30dBZ)</b> — Light Rain ผ่านได้</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#d29922;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#d29922">เหลือง (35–45dBZ)</b> — CB พัฒนา CAUTION Turb</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#f85149;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#f85149">ส้ม/แดง (50–60dBZ)</b> — CB Heavy Rain AVOID</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(188,140,255,0.08);border:1px solid rgba(188,140,255,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#bc8cff;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#bc8cff">ม่วง/ขาว (60+dBZ)</b> — Severe CB ห้ามผ่านเด็ดขาด</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📏 Visibility Reference</div>
+              <table><thead><tr><th>VIS</th><th>Category</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">&lt;200m</td><td><span class="tag tag-red">CAT IIIb/c</span></td></tr>
+                <tr><td class="mono">200–550m</td><td><span class="tag tag-red">CAT II/IIIa</span></td></tr>
+                <tr><td class="mono">550m (1,800ft)</td><td><span class="tag tag-amber">CAT I min</span></td></tr>
+                <tr><td class="mono">800m</td><td>Plan A +200 min</td></tr>
+                <tr><td class="mono">1,500m</td><td>Plan B min</td></tr>
+                <tr><td class="mono">5,000m</td><td>No Alternate threshold</td></tr>
+                <tr><td class="mono">9,999m+</td><td>METAR 9999 = ≥10km</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">📱 Weather Sources สำหรับ Dispatcher</div>
+              <table><thead><tr><th>แหล่งข้อมูล</th><th>ใช้สำหรับ</th><th>Update</th></tr></thead>
+              <tbody>
+                <tr><td>METAR</td><td>Actual DEP/DEST/ALT</td><td>30min/1hr</td></tr>
+                <tr><td>TAF</td><td>Planning Minima</td><td>6hr</td></tr>
+                <tr><td>SIGMET</td><td>En-route Hazards</td><td>4–6hr</td></tr>
+                <tr><td>PIREP/UUA</td><td>Actual Conditions</td><td>As filed</td></tr>
+                <tr><td>SIGWX Chart</td><td>CB Jet Stream</td><td>6hr</td></tr>
+                <tr><td>Radar/Satellite</td><td>Real-time CB</td><td>5–15min</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end page-meteo -->
+
 
   </div><!-- main -->
 </div><!-- layout -->
@@ -1809,6 +2278,26 @@ function importUserData(){
     reader.readAsText(file);
   };
   input.click();
+}
+
+
+// ===================== METEOROLOGY TABS (isolated) =====================
+function showMTab(name, el) {
+  var page = document.getElementById('page-meteo');
+  if (!page) return;
+  // Hide all panes in meteo page
+  page.querySelectorAll('.meteo-pane').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  // Deactivate all tab buttons in meteo page
+  page.querySelectorAll('.meteo-tab').forEach(function(t) {
+    t.classList.remove('active');
+  });
+  // Show target pane
+  var target = document.getElementById('mpane-' + name);
+  if (target) target.classList.add('active');
+  // Activate button
+  if (el) el.classList.add('active');
 }
 
 // ===================== INIT =====================

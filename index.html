@@ -30,14 +30,18 @@
   --mono:'IBM Plex Mono',monospace;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
-.layout{display:grid;grid-template-columns:240px 1fr;grid-template-rows:58px 1fr;height:100vh}
+.layout{display:grid;grid-template-columns:240px 1fr;grid-template-rows:58px 1fr;height:100vh;transition:grid-template-columns 0.25s ease}
+.layout.sb-hidden{grid-template-columns:0px 1fr}
+.layout.sb-hidden .sidebar{overflow:hidden;padding:0;border-right:none}
+.sb-toggle{background:none;border:none;cursor:pointer;padding:4px 8px;font-size:16px;color:var(--text2);border-radius:5px;line-height:1;transition:background 0.1s;margin-right:6px}
+.sb-toggle:hover{background:var(--bg3);color:var(--text)}
 .topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px}
 .logo{font-size:18px;font-weight:600;color:var(--text);letter-spacing:-0.5px;white-space:nowrap}
 .logo span{color:var(--blue)}
 .badge-live{background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;border:1px solid var(--green)}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .clock{color:var(--text2);font-size:13px;font-family:var(--mono)}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto;transition:padding 0.25s,border 0.25s,overflow 0.1s}
 .nav-sec{padding:6px 14px 4px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--text2);font-size:14px;transition:all 0.12s;border-left:3px solid transparent}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
@@ -162,11 +166,19 @@ select.inp{cursor:pointer}
 .meteo-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
 .meteo-pane{display:none}
 .meteo-pane.active{display:block}
+
+/* ===== DISPATCH TABS ===== */
+.dsp-tab{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 11px;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.12s;white-space:nowrap}
+.dsp-tab:hover{background:var(--bg4);color:var(--text)}
+.dsp-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
+.dsp-pane{display:none}
+.dsp-pane.active{display:block}
 </style>
 </head>
 <body>
 <div class="layout">
   <div class="topbar">
+    <button class="sb-toggle" id="sb-toggle-btn" onclick="toggleSidebar()" title="ซ่อน/แสดงเมนู">◀</button>
     <div class="logo">K-MILE <span>TUM</span></div>
     <div class="badge-live">● LIVE</div>
     <div class="clock" id="clock">—</div>
@@ -584,108 +596,740 @@ select.inp{cursor:pointer}
     <!-- ===== DISPATCH ===== -->
     <div class="page" id="page-dispatch">
       <div class="page-hd">Dispatch Guide</div>
-      <div class="page-sub">Flight Planning Minimum & Weather Radar Reference</div>
-      <div class="sec-grid">
-        <div>
-          <div class="card">
-            <div class="card-title">☁ Weather Planning Minimum</div>
-            <div style="font-size:12px;line-height:2;color:var(--text2)">
-              <b style="color:var(--blue)">Departure</b><br>
-              • ทัศนวิสัยต้องดีกว่าค่าขั้นต่ำรันเวย์นั้นๆ รวม Takeoff Performance<br><br>
-              <b style="color:var(--blue)">Destination (with Alternate)</b><br>
-              • TAF (ETA ± 1 ชม.) ทัศนวิสัยดีกว่า Landing Minimum<br>
-              • ถ้าพอดี/ต่ำกว่า → ต้องมี Alternate 2 แห่ง<br><br>
-              <b style="color:var(--blue)">Destination (No Alternate)</b><br>
-              • Flight time ≤ 6 ชม. (TAF อาจ Error ถ้าเกิน)<br>
-              • TAF (ETA ± 1 ชม.) VIS > 5–8 km<br>
-              • Ceiling > 2,000 ft AGL<br>
-              • ไม่มีรายงานอากาศต่ำกว่า Landing Minima<br>
-              • 2 Runway แยกกัน + เครื่องช่วยลงจอดเป็นของตัวเอง<br>
-              • NOTAM, ATC, RFFS พร้อม<br><br>
-              <b style="color:var(--blue)">Alternate</b><br>
-              • TAF (ETA ± 1 ชม.) ทัศนวิสัยดีกว่า Alternate Minimum<br>
-              • NOTAM เปิด + มีอุปกรณ์ช่วยเหลือ
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">👁 Visibility Conversion</div>
-            <table><thead><tr><th>Meters</th><th>Feet</th><th>SM</th></tr></thead>
-              <tbody>
-                <tr><td class="mono">550 m</td><td class="mono">1,800 ft</td><td>~0.35</td></tr>
-                <tr><td class="mono">800 m</td><td class="mono">2,600 ft</td><td>~0.5</td></tr>
-                <tr><td class="mono">1,500 m</td><td class="mono">5,000 ft</td><td>~1 SM</td></tr>
-                <tr><td class="mono">5,000 m</td><td class="mono">16,400 ft</td><td>3 SM</td></tr>
-                <tr><td class="mono">8,000 m</td><td class="mono">26,200 ft</td><td>5 SM</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="card">
-            <div class="card-title">☁ Cloud Base Reference</div>
-            <table><thead><tr><th>Type</th><th>นับเป็น Ceiling?</th><th>หมายเหตุ</th></tr></thead>
-              <tbody>
-                <tr><td>BKN / OVC</td><td><span class="tag tag-red">= Ceiling</span></td><td>5/8–8/8 อ้อมท้องฟ้า</td></tr>
-                <tr><td>FEW / SCT</td><td><span class="tag tag-green">≠ Ceiling</span></td><td>1/8–4/8 ไม่นับ</td></tr>
-                <tr><td>&lt; 200 ft</td><td><span class="tag tag-red">CAT II/III</span></td><td>ต้องการระบบ Autoland</td></tr>
-                <tr><td>&gt; 2,000 ft</td><td><span class="tag tag-green">No Alt OK</span></td><td>เงื่อนไข No Alternate</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <div class="card">
-            <div class="card-title">🌧 Radar Color Guide</div>
-            <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
-              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(86,211,100,0.08);border:1px solid rgba(86,211,100,0.25);border-radius:6px">
-                <div style="width:12px;height:12px;background:#4ade80;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
-                <div><b style="color:#4ade80">สีฟ้า/เขียวอ่อน (15–30 dBZ)</b><br><span style="color:var(--text2)">Drizzle / Light Rain / NS — SAFE ผ่านได้ แต่ตรวจสอบ Visibility ปลายทาง</span></div>
-              </div>
-              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25);border-radius:6px">
-                <div style="width:12px;height:12px;background:#d29922;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
-                <div><b style="color:#d29922">สีเหลือง (35–45 dBZ)</b><br><span style="color:var(--text2)">Moderate Rain / NS กำลังพัฒนาเป็น CB — CAUTION ระวัง Turbulence</span></div>
-              </div>
-              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:6px">
-                <div style="width:12px;height:12px;background:#f85149;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
-                <div><b style="color:#f85149">สีส้ม/แดง (50–60 dBZ)</b><br><span style="color:var(--text2)">Heavy Rain / CB — AVOID หลีกเลี่ยง มี Turbulence + ฟ้าผ่า</span></div>
-              </div>
-              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(188,140,255,0.08);border:1px solid rgba(188,140,255,0.25);border-radius:6px">
-                <div style="width:12px;height:12px;background:#bc8cff;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
-                <div><b style="color:#bc8cff">สีม่วง/ชมพู/ขาว (60–65+ dBZ)</b><br><span style="color:var(--text2)">Intense Rain + ลูกเห็บ / Severe CB — SEVERE! ห้ามผ่านเด็ดขาด</span></div>
+      <div class="page-sub">คู่มือปฏิบัติการ Flight Dispatcher ตาม ICAO Annex 6 / K-Mile Asia SOP</div>
+
+      <!-- TAB BAR (using showDTab — completely isolated) -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="meteo-tab active" onclick="showDTab('wx',this)tive">🌦 Weather Planning</button>
+        <button class="meteo-tab" onclick="showDTab('fuel',this)">⛽ Fuel Policy</button>
+        <button class="meteo-tab" onclick="showDTab('release',this)">📋 Dispatch Release</button>
+        <button class="meteo-tab" onclick="showDTab('notam',this)">📡 NOTAM</button>
+        <button class="meteo-tab" onclick="showDTab('perf',this)">📊 Performance</button>
+        <button class="meteo-tab" onclick="showDTab('emergency',this)">🚨 Emergency</button>
+        <button class="dsp-tab" onclick="showDTab('comms',this)">📡 ATC & Comms</button>
+        <button class="dsp-tab" onclick="showDTab('intl',this)">🌏 International Ops</button>
+        <button class="dsp-tab" onclick="showDTab('legal',this)">⚖ Regulations</button>
+      </div>
+
+      <!-- WX PLANNING -->
+      <div class="dsp-pane active" id="dpane-wx">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">☁ Weather Planning Minimum — 3 ขั้นตอน</div>
+              <div style="font-size:12px;line-height:2;color:var(--text2)">
+                <b style="color:var(--blue)">1. Departure Airport</b><br>
+                • ทัศนวิสัยต้องดีกว่าค่าขั้นต่ำรันเวย์นั้นๆ รวม Takeoff Performance<br>
+                • ถ้า WX ต่ำกว่า → ต้องมี Takeoff Alternate (≤60 นาที)<br><br>
+                <b style="color:var(--blue)">2. Destination Airport</b><br>
+                • TAF ที่ช่วง ETA ± 1 ชม. ดีกว่า Landing Minima → Alternate 1 แห่ง<br>
+                • TAF ต่ำกว่า Landing Minima หรือไม่มีข้อมูล → Alternate 2 แห่ง<br><br>
+                <b style="color:var(--blue)">3. Alternate Airport</b><br>
+                • TAF ที่ช่วง ETA ± 1 ชม. ดีกว่า Alternate Planning Minima (Plan A หรือ B)<br>
+                • NOTAM เปิด + RFFS พร้อม + ระยะทางสมเหตุสมผล
               </div>
             </div>
-          </div>
-          <div class="card">
-            <div class="card-title">✈ Decision Guide</div>
-            <table>
-              <thead><tr><th>สภาพอากาศ</th><th>Action</th></tr></thead>
+            <div class="card">
+              <div class="card-title">🎯 Planning Minima — Plan A vs Plan B</div>
+              <table><thead><tr><th>Plan</th><th>เงื่อนไข</th><th>DA/H</th><th>RVR/VIS</th></tr></thead>
               <tbody>
-                <tr><td>VIS > Min</td><td><span class="tag tag-green">✅ GO</span></td></tr>
-                <tr><td>VIS = Min (Dest)</td><td><span class="tag tag-amber">⚠ ต้องมี 2 Alternates</span></td></tr>
-                <tr><td>VIS &lt; Min</td><td><span class="tag tag-red">❌ NO GO</span></td></tr>
-                <tr><td>CB on route</td><td><span class="tag tag-amber">🔄 Re-route / Deviate</span></td></tr>
-                <tr><td>Stratiform (เขียว/เหลือง)</td><td><span class="tag tag-blue">ตรวจ Visibility ปลายทาง</span></td></tr>
-                <tr><td>Convective (แดง/ม่วง)</td><td><span class="tag tag-red">ตรวจ Wind Shear / Microburst</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="card">
-            <div class="card-title">📝 TAF Validity</div>
-            <table>
-              <thead><tr><th>Term</th><th>ความหมาย</th></tr></thead>
+                <tr>
+                  <td><span class="tag tag-amber">Plan A</span></td>
+                  <td>Single Runway / One Facility</td>
+                  <td class="mono">DA/H + 400 ft</td>
+                  <td class="mono">VIS + 1,500 m</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-green">Plan B</span></td>
+                  <td>Dual Runway / Two Facilities</td>
+                  <td class="mono">DA/H + 200 ft</td>
+                  <td class="mono">VIS + 800 m</td>
+                </tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:6px;padding:8px;line-height:1.9">
+                Plan B คำนวณ 2 ระบบแยกกัน → ใช้ "Higher of the Two" เป็นเกณฑ์ควบคุม
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📏 VIS Conversion</div>
+              <table><thead><tr><th>Meters</th><th>Feet</th><th>SM</th></tr></thead>
               <tbody>
-                <tr><td>ETA ± 1 hr</td><td>ช่วงเวลา TAF ที่ต้องดู</td></tr>
-                <tr><td>TEMPO</td><td>เปลี่ยนชั่วคราว &lt;1 ชม.</td></tr>
-                <tr><td>BECMG</td><td>เปลี่ยนถาวรในช่วงเวลาหนึ่ง</td></tr>
-                <tr><td>PROB30/40</td><td>ความน่าจะเป็น 30%/40%</td></tr>
-                <tr><td>Flight &gt;6 ชม.</td><td><span class="tag tag-amber">TAF อาจ Error ระวัง!</span></td></tr>
-              </tbody>
-            </table>
+                <tr><td class="mono">550 m</td><td class="mono">1,800 ft</td><td class="mono">~0.34</td></tr>
+                <tr><td class="mono">800 m</td><td class="mono">2,600 ft</td><td class="mono">0.50</td></tr>
+                <tr><td class="mono">1,500 m</td><td class="mono">5,000 ft</td><td class="mono">~1.00</td></tr>
+                <tr><td class="mono">3,000 m</td><td class="mono">10,000 ft</td><td class="mono">2.00</td></tr>
+                <tr><td class="mono">5,000 m</td><td class="mono">16,400 ft</td><td class="mono">3.00</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🌧 Weather Radar Quick Ref</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(86,211,100,0.08);border:1px solid rgba(86,211,100,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#4ade80;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#4ade80">ฟ้า/เขียว (15–30dBZ)</b> — Light Rain ผ่านได้ ตรวจ VIS</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#d29922;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#d29922">เหลือง (35–45dBZ)</b> — CB กำลังพัฒนา CAUTION</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#f85149;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#f85149">ส้ม/แดง (50–60dBZ)</b> — CB Heavy Rain AVOID</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:8px;background:rgba(188,140,255,0.08);border:1px solid rgba(188,140,255,0.25);border-radius:6px">
+                  <div style="width:14px;height:14px;background:#bc8cff;border-radius:3px;flex-shrink:0"></div>
+                  <div><b style="color:#bc8cff">ม่วง/ขาว (60+dBZ)</b> — Severe CB ห้ามผ่าน</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">✅ Dispatcher Decision Guide</div>
+              <table><thead><tr><th>สถานการณ์</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>VIS &gt; Landing Min</td><td><span class="tag tag-green">GO — 1 Alternate</span></td></tr>
+                <tr><td>VIS = หรือ ต่ำกว่า Min</td><td><span class="tag tag-amber">2 Alternates</span></td></tr>
+                <tr><td>CB บน Route</td><td><span class="tag tag-amber">Re-route / Deviate 20NM</span></td></tr>
+                <tr><td>SIGMET VA</td><td><span class="tag tag-red">ห้ามบินผ่าน AVOID</span></td></tr>
+                <tr><td>Alternate WX Marginal</td><td><span class="tag tag-amber">หา Alternate เพิ่ม</span></td></tr>
+              </tbody></table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ===== NAV AIDS ===== -->
-    <div class="page" id="page-nav_aids">
+      <!-- FUEL POLICY -->
+      <div class="dsp-pane" id="dpane-fuel">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">⛽ Fuel Components (ICAO Annex 6)</div>
+              <table><thead><tr><th>Component</th><th>คำนวณจาก</th><th>K-Mile Reference</th></tr></thead>
+              <tbody>
+                <tr><td><b style="color:var(--blue)">Taxi Fuel</b></td><td>Ground Ops ประมาณการ</td><td>B747: 441 kg | B737: 200 kg | B767: 700 kg</td></tr>
+                <tr><td><b style="color:var(--green)">Trip Fuel</b></td><td>DEP → DEST</td><td>Climb + Cruise + Descent</td></tr>
+                <tr><td><b style="color:var(--amber)">Contingency</b></td><td>5% of Trip (หรือ 3% ถ้ามี ERA)</td><td>ความไม่แน่นอน WX/Wind/ATC</td></tr>
+                <tr><td><b style="color:var(--purple)">Alternate Fuel</b></td><td>DEST → ALTN</td><td>รวม Missed Approach ที่ DEST</td></tr>
+                <tr><td><b style="color:var(--red)">Final Reserve</b></td><td>30 min ที่ Alternate (Turbine)</td><td>ห้ามใช้ ยกเว้น Emergency</td></tr>
+                <tr><td><b>Additional Fuel</b></td><td>Dispatcher ดุลพินิจ</td><td>WX ไม่ดี / ATC Delay คาดการณ์</td></tr>
+                <tr><td><b>Extra Fuel</b></td><td>PIC Request</td><td>ดุลพินิจ PIC</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🔢 Fuel Formula</div>
+              <div style="font-size:12px;font-family:var(--mono);color:var(--text2);line-height:2.5;background:var(--bg3);border-radius:8px;padding:12px">
+                <span style="color:var(--text)">Minimum Dispatch Fuel =</span><br>
+                &nbsp;&nbsp;Taxi + Trip + Contingency + Alternate + Final Reserve<br><br>
+                <span style="color:var(--text)">Ramp Fuel =</span><br>
+                &nbsp;&nbsp;Taxi + Trip + Contingency + Alternate + Final Reserve + Additional + Extra<br><br>
+                <span style="color:var(--text)">TOF (Take-Off Fuel) =</span><br>
+                &nbsp;&nbsp;Ramp Fuel − Taxi Fuel<br><br>
+                <span style="color:var(--green);font-weight:600">Endurance = TOF ÷ Fuel Flow (hr)</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📏 Contingency Rules</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+                <div style="background:var(--blue-bg);border:1px solid var(--blue);border-radius:8px;padding:12px">
+                  <b style="color:var(--blue)">5% Standard</b>
+                  <div style="color:var(--text2);margin-top:6px;line-height:2">= Trip × 5%<br>ใช้ได้ทุกกรณี<br>ไม่ต้องมีเงื่อนไข</div>
+                </div>
+                <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:8px;padding:12px">
+                  <b style="color:var(--green)">3% ERA Rule</b>
+                  <div style="color:var(--text2);margin-top:6px;line-height:2">= Trip × 3%<br>ต้องมี En-Route Alternate<br>อากาศดี เปิดบริการ</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🛢 Fuel Density (Jet A-1)</div>
+              <table><thead><tr><th>สภาวะ</th><th>Density</th><th>หมายเหตุ</th></tr></thead>
+              <tbody>
+                <tr><td>ร้อน (&gt;30°C)</td><td class="mono">~0.775 kg/L</td><td>ได้น้ำมันน้อยกว่า Litres เดียวกัน</td></tr>
+                <tr><td>Standard (ISA)</td><td class="mono">~0.800 kg/L</td><td>15°C — ค่ามาตรฐาน</td></tr>
+                <tr><td>เย็น</td><td class="mono">~0.820 kg/L</td><td>Dense กว่า</td></tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:11px;color:var(--text3)">ใช้ค่า Density จริงจาก Fuel Slip/Uplift Sheet เสมอ</div>
+            </div>
+            <div class="card">
+              <div class="card-title">⚠ Critical Fuel Concepts</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--red)">Minimum Fuel</b> — Pilot รายงาน ATC เมื่อ Fuel ถึงขั้นต่ำ แต่ยังไม่ Emergency<br>
+                <b style="color:var(--red)">MAYDAY FUEL</b> — Fuel ต่ำถึงขั้น Emergency ต้องลงทันที<br>
+                <b style="color:var(--amber)">Tankering</b> — บรรทุก Fuel เพิ่มจาก DEP เพราะ Fuel ที่ DEST แพงกว่า<br>
+                <b style="color:var(--text)">Uplift</b> — ปริมาณ Fuel ที่เติมเข้าเครื่องจริง
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPATCH RELEASE -->
+      <div class="dsp-pane" id="dpane-release">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">📋 Dispatcher Responsibilities (ICAO Annex 6)</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1">
+                <b style="color:var(--text)">หน้าที่หลัก:</b><br>
+                • <b style="color:var(--blue)">Co-authority</b> ร่วมกับ PIC ใน Release/Dispatch เที่ยวบิน<br>
+                • วิเคราะห์ Weather, NOTAM, ATC Restriction ก่อน Release<br>
+                • คำนวณ Fuel, Weight &amp; Balance, Performance<br>
+                • ติดตามเที่ยวบินระหว่างปฏิบัติการ (In-flight Monitoring)<br>
+                • ออก ATC Flight Plan และ Operations Flight Plan<br><br>
+                <b style="color:var(--text)">สิทธิ์:</b><br>
+                • Dispatcher มีสิทธิ์ <b style="color:var(--red)">Delay/Cancel</b> เที่ยวบินถ้าไม่ปลอดภัย<br>
+                • ต้องได้รับ Signature ทั้ง Dispatcher และ PIC บน OFP ก่อน Departure
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">✅ Dispatcher Checklist ก่อน Release</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.2">
+                <span style="color:var(--green)">☑</span> METAR/TAF DEP/DEST/ALT ผ่าน Planning Minima<br>
+                <span style="color:var(--green)">☑</span> SIGMET/AIRMET ตรวจสอบ En-route<br>
+                <span style="color:var(--green)">☑</span> NOTAM DEP/DEST/ALT/Route<br>
+                <span style="color:var(--green)">☑</span> Fuel: Ramp/Trip/Contingency/Alt/Reserve<br>
+                <span style="color:var(--green)">☑</span> Weight: DOW/Payload/ZFW/TOW ≤ Structural Limits<br>
+                <span style="color:var(--green)">☑</span> PLTOW/PLLW จาก Performance Chart<br>
+                <span style="color:var(--green)">☑</span> ATC FPL Filed &amp; Accepted<br>
+                <span style="color:var(--green)">☑</span> SLOT ตรงกับ ATD<br>
+                <span style="color:var(--green)">☑</span> MEL/CDL ตรวจสอบ Go/No-go<br>
+                <span style="color:var(--green)">☑</span> OFP Signed โดย Dispatcher + PIC
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📄 OFP Contents</div>
+              <table><thead><tr><th>Section</th><th>รายละเอียด</th></tr></thead>
+              <tbody>
+                <tr><td>General Info</td><td>Flight No., Date, Route, AC Reg, Crew</td></tr>
+                <tr><td>Fuel</td><td>Ramp/TOF/Trip/Cont/Alt/Reserve</td></tr>
+                <tr><td>Weight</td><td>DOW/Payload/ZFW/TOW/LW/MTL</td></tr>
+                <tr><td>Route</td><td>Waypoints, Airways, FL, Distance, ETE</td></tr>
+                <tr><td>Weather</td><td>DEP/DEST/ALT METAR+TAF Summary</td></tr>
+                <tr><td>NOTAM</td><td>Significant NOTAMs ทุก Airport/Route</td></tr>
+                <tr><td>Performance</td><td>PLTOW, PLLW จาก Performance Chart</td></tr>
+                <tr><td>Alternate</td><td>ชื่อ Alternate + Fuel + Weather</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🚨 Dispatcher Authority — Go / No-Go</div>
+              <table><thead><tr><th>สถานการณ์</th><th>Decision</th></tr></thead>
+              <tbody>
+                <tr><td>WX ต่ำกว่า Planning Minima</td><td><span class="tag tag-red">DELAY / CANCEL</span></td></tr>
+                <tr><td>MEL ไม่ผ่าน Go-item</td><td><span class="tag tag-red">NO-GO</span></td></tr>
+                <tr><td>Fuel ไม่ถึง Minimum Dispatch</td><td><span class="tag tag-red">NO-GO</span></td></tr>
+                <tr><td>TOW เกิน PLTOW</td><td><span class="tag tag-red">NO-GO</span></td></tr>
+                <tr><td>NOTAM RWY ปิดกระทบ</td><td><span class="tag tag-amber">ประเมิน / เลือก RWY อื่น</span></td></tr>
+                <tr><td>SIGMET บน Route</td><td><span class="tag tag-amber">Re-route / Extra Fuel</span></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTAM -->
+      <div class="dsp-pane" id="dpane-notam">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">📡 NOTAM Categories</div>
+              <table><thead><tr><th>ประเภท</th><th>ความหมาย</th><th>ตัวอย่างสำคัญ</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tag tag-red">NOTAM A</span></td><td>Aerodrome/Airport</td><td>RWY ปิด, ILS ไม่ทำงาน, ATC Hours</td></tr>
+                <tr><td><span class="tag tag-amber">NOTAM B</span></td><td>En-route/Airspace</td><td>Airway ปิด, Restricted Area, ADIZ</td></tr>
+                <tr><td><span class="tag tag-blue">NOTAM C</span></td><td>Navigation Aids</td><td>VOR/NDB ไม่ทำงาน, ILS Calibrate</td></tr>
+                <tr><td><span class="tag tag-purple">NOTAM D</span></td><td>Obstacles</td><td>สิ่งกีดขวางใหม่, Crane, Tower</td></tr>
+                <tr><td><span class="tag tag-green">SNOWTAM</span></td><td>Snow/Ice/Slush</td><td>RWY Condition, Braking Action</td></tr>
+                <tr><td><span class="tag tag-amber">BIRDTAM</span></td><td>Bird Activity</td><td>Bird Strike Risk Level</td></tr>
+              </tbody></table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.9;background:var(--bg3);border-radius:6px;padding:8px">
+                <b style="color:var(--text)">ต้องตรวจสอบทุกเที่ยว:</b> DEP → DEST → ALT(s) → En-route
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔤 ATC Flight Plan (FPL) Structure</div>
+              <div style="font-family:var(--mono);font-size:11px;background:var(--bg3);border-radius:8px;padding:12px;line-height:2.2;overflow-x:auto">
+                <span style="color:var(--blue)">(FPL</span><br>
+                <span style="color:var(--amber)">-8K525</span><span style="color:var(--text3)"> &lt;Callsign&gt;</span><br>
+                <span style="color:var(--green)">-IS</span><span style="color:var(--text3)"> &lt;IFR Scheduled&gt;</span><br>
+                <span style="color:var(--purple)">-B738/M</span><span style="color:var(--text3)"> &lt;Type/Wake&gt;</span><br>
+                <span style="color:var(--teal)">-SDE2E3FGHIJ3J5M1RWXY</span><span style="color:var(--text3)"> &lt;Equipment&gt;</span><br>
+                <span style="color:var(--amber)">-VVNB1530</span><span style="color:var(--text3)"> &lt;DEP+EOBT&gt;</span><br>
+                <span style="color:var(--blue)">-N0460F350 DCT VVNB...</span><span style="color:var(--text3)"> &lt;Speed+FL+Route&gt;</span><br>
+                <span style="color:var(--green)">-VHHH0200 ZGGG</span><span style="color:var(--text3)"> &lt;DEST ETE ALT&gt;</span><br>
+                <span style="color:var(--text2)">-E/0420 P/TBE R/VE S/M J/L D/2 288C)</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📡 FPL Equipment Codes</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+                <div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">COM/NAV</div>
+                  <div style="line-height:2.1"><span class="mono">S</span> VHF RTF<br><span class="mono">H</span> HF RTF<br><span class="mono">D</span> DME<br><span class="mono">O</span> VOR<br><span class="mono">I</span> ILS<br><span class="mono">F</span> ADF<br><span class="mono">G</span> GNSS<br><span class="mono">R</span> RNP</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Surveillance</div>
+                  <div style="line-height:2.1"><span class="mono">A</span> Mode A<br><span class="mono">C</span> Mode C (Alt)<br><span class="mono">S</span> Mode S<br><span class="mono">E</span> Mode S + ADS-B<br><span class="mono">1</span> ADS-B Out 1090MHz<br><span class="mono">7700</span> Emergency<br><span class="mono">7600</span> Radio Fail<br><span class="mono">7500</span> Hijack</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">✈ ETOPS / Extended Operations</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ETOPS คืออะไร:</b> 2-Engine บินไกลจาก Diversion Airport เกิน 60 นาที<br>
+                <b style="color:var(--blue)">ETOPS 120:</b> ห่างได้ไม่เกิน 120 นาที<br>
+                <b style="color:var(--blue)">ETOPS 180:</b> ห่างได้ไม่เกิน 180 นาที (บินข้ามมหาสมุทร)<br><br>
+                <b style="color:var(--text)">Dispatcher ต้องตรวจ ETOPS Airport:</b><br>
+                • WX ดีกว่า ETOPS Weather Minima<br>
+                • RFFS Category เหมาะสม<br>
+                • ATC ให้บริการตลอด ETD/ETA ± buffer<br>
+                • Fuel พร้อม (ถ้า Divert ต้องการ)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFORMANCE -->
+      <div class="dsp-pane" id="dpane-perf">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">⚖ Weight Terminology</div>
+              <table><thead><tr><th>ย่อ</th><th>ความหมาย</th><th>หมายเหตุ</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">MEW/BEW</td><td>Manufacturer/Basic Empty Weight</td><td>OEW ของเครื่องบินเปล่า</td></tr>
+                <tr><td class="mono">OEW/DOW</td><td>Operating/Dry Operating Weight</td><td>OEW + Crew + Items ปฏิบัติการ</td></tr>
+                <tr><td class="mono">ZFW</td><td>Zero Fuel Weight</td><td>DOW + Payload (ไม่รวม Fuel)</td></tr>
+                <tr><td class="mono">TOW</td><td>Take-Off Weight</td><td>ZFW + TOF</td></tr>
+                <tr><td class="mono">LW</td><td>Landing Weight</td><td>TOW − Trip Fuel</td></tr>
+                <tr><td class="mono">MZFW</td><td>Maximum ZFW</td><td>โครงสร้าง Wing Root</td></tr>
+                <tr><td class="mono">MTOW</td><td>Maximum TOW</td><td>โครงสร้างสูงสุด</td></tr>
+                <tr><td class="mono">MLW</td><td>Maximum Landing Weight</td><td>โครงสร้าง Landing Gear</td></tr>
+                <tr><td class="mono">PLTOW/PLLW</td><td>Performance Limit TOW/LW</td><td>จาก Temp/RWY/Wind Correction</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">🛫 V-Speeds สำคัญ</div>
+              <table><thead><tr><th>Speed</th><th>ความหมาย</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" style="color:var(--red)">V1</td><td>Takeoff Decision Speed — หลัง V1 ต้อง Takeoff</td></tr>
+                <tr><td class="mono" style="color:var(--amber)">VR</td><td>Rotation Speed — ยกหัวเครื่อง</td></tr>
+                <tr><td class="mono" style="color:var(--green)">V2</td><td>Takeoff Safety Speed — ปลอดภัยถ้า Engine fail</td></tr>
+                <tr><td class="mono">Vref</td><td>Landing Reference Speed = 1.3 Vs</td></tr>
+                <tr><td class="mono" style="color:var(--blue)">VMO/MMO</td><td>Maximum Operating Speed — ห้ามเกิน</td></tr>
+                <tr><td class="mono">VFE</td><td>Max Flap Extension Speed</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🛫 Takeoff Distance Definitions</div>
+              <table><thead><tr><th>Term</th><th>คำนิยาม</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">TORA</td><td>Takeoff Run Available — ความยาว Runway</td></tr>
+                <tr><td class="mono">TODA</td><td>TORA + Clearway</td></tr>
+                <tr><td class="mono">ASDA</td><td>TORA + Stopway — ระยะหยุดฉุกเฉิน</td></tr>
+                <tr><td class="mono">LDA</td><td>Landing Distance Available</td></tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">📉 PLTOW Limiting Factors</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">PLTOW = min ของ:</b><br>
+                • <b style="color:var(--blue)">Structural MTOW</b><br>
+                • <b style="color:var(--green)">Field Length Limit</b> (TORA/TODA/ASDA)<br>
+                • <b style="color:var(--amber)">Obstacle Clearance</b><br>
+                • <b style="color:var(--red)">Brake Energy Limit</b><br>
+                • <b style="color:var(--purple)">Climb Gradient (OEI)</b><br><br>
+                Temperature ↑ → DA ↑ → PLTOW ↓<br>
+                Headwind ↑ → PLTOW ↑ (ดีขึ้น)<br>
+                Contaminated RWY → PLTOW ↓↓
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📋 1-2-3 Alternate Rule</div>
+              <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ต้องมี Alternate ถ้า TAF ของ DEST ที่ ETA ± 1 ชม.:</b><br>
+                • Ceiling &lt; <b style="color:var(--amber)">2,000 ft</b> หรือ<br>
+                • Visibility &lt; <b style="color:var(--amber)">3 SM</b><br><br>
+                <b style="color:var(--blue)">1-2-3 Rule:</b> 1 hour / 2,000 ft / 3 SM<br><br>
+                <b style="color:var(--green)">No Alternate ถ้า:</b> VIS &gt;5km + Ceiling &gt;2,000ft + 2 RWY แยก + Flight ≤6 hr
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMERGENCY -->
+      <div class="dsp-pane" id="dpane-emergency">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">🚨 Emergency Phases (ICAO Annex 12)</div>
+              <table><thead><tr><th>Phase</th><th>เงื่อนไข</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="tag tag-amber">INCERFA</span><br><small>Uncertainty</small></td>
+                  <td>ไม่ได้รับรายงาน / ข้อมูล</td>
+                  <td>แจ้ง ACC/FIC ติดต่อ Aircraft ทุกช่องทาง</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-red">ALERFA</span><br><small>Alert</small></td>
+                  <td>ยังติดต่อ AC ไม่ได้</td>
+                  <td>แจ้ง RCC เตรียม SAR</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag-red">DETRESFA</span><br><small>Distress</small></td>
+                  <td>อันตรายร้ายแรง ต้องช่วยทันที</td>
+                  <td>Activate SAR ทันที แจ้งทุกฝ่าย</td>
+                </tr>
+              </tbody></table>
+            </div>
+            <div class="card">
+              <div class="card-title">📻 Emergency Frequencies</div>
+              <table><thead><tr><th>Frequency</th><th>ใช้สำหรับ</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" style="color:var(--red)">121.5 MHz</td><td>VHF Emergency Guard — ทุกเครื่องรับฟัง</td></tr>
+                <tr><td class="mono" style="color:var(--red)">243.0 MHz</td><td>UHF Military Emergency</td></tr>
+                <tr><td class="mono">7700</td><td>Squawk Emergency</td></tr>
+                <tr><td class="mono">7600</td><td>Squawk Radio Failure</td></tr>
+                <tr><td class="mono">7500</td><td>Squawk Hijack</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">⚡ MAYDAY vs PAN PAN</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+                <div style="background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:12px">
+                  <b style="color:var(--red)">MAYDAY MAYDAY MAYDAY</b>
+                  <div style="color:var(--text2);margin-top:6px;line-height:1.9">
+                    อันตรายร้ายแรง ต้องการความช่วยเหลือทันที<br>
+                    Engine Fire / Depressurization / Fuel Exhaustion
+                  </div>
+                </div>
+                <div style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:8px;padding:12px">
+                  <b style="color:var(--amber)">PAN PAN PAN PAN PAN PAN</b>
+                  <div style="color:var(--text2);margin-top:6px;line-height:1.9">
+                    เร่งด่วน ยังไม่ถึงขั้น MAYDAY<br>
+                    Medical Emergency / Fuel Low / System Failure
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🛬 Dispatcher Role ระหว่าง Diversion</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2.1">
+                <span style="color:var(--green)">☑</span> แจ้ง DEST Airport ยกเลิก Slot/Catering<br>
+                <span style="color:var(--green)">☑</span> ติดต่อ Ground Handling ที่ Alternate<br>
+                <span style="color:var(--green)">☑</span> แจ้ง Fuel ที่ต้องการที่ Alternate<br>
+                <span style="color:var(--green)">☑</span> Update OFP / ประสาน ATC<br>
+                <span style="color:var(--green)">☑</span> แจ้งผู้บริหาร / Operations Control<br>
+                <span style="color:var(--green)">☑</span> Coordinate กับ ARFF ถ้าจำเป็น<br>
+                <span style="color:var(--green)">☑</span> Document ทุกการตัดสินใจ + เวลา
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ATC & COMMS -->
+      <div class="dsp-pane" id="dpane-comms">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">📡 ATC Communication — phraseology สำคัญ</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                Dispatcher ต้องเข้าใจภาษา ATC เพื่อวิเคราะห์ปัญหาและประสาน Crew ได้ถูกต้อง
+              </div>
+              <table>
+                <thead><tr><th>Situation</th><th>Phraseology</th><th>ความหมาย</th></tr></thead>
+                <tbody>
+                  <tr><td>Request FL change</td><td class="mono">Request FL350</td><td>ขอเปลี่ยนระดับบินเป็น FL350</td></tr>
+                  <tr><td>Weather deviation</td><td class="mono">Request deviation left/right [X]nm due weather</td><td>ขอหลบสภาพอากาศ</td></tr>
+                  <tr><td>Emergency</td><td class="mono">MAYDAY MAYDAY MAYDAY [Callsign] [nature] [intentions]</td><td>ฉุกเฉินร้ายแรง</td></tr>
+                  <tr><td>Urgency</td><td class="mono">PAN PAN PAN PAN PAN PAN</td><td>เร่งด่วน ไม่ถึงขั้น Mayday</td></tr>
+                  <tr><td>RVSM deviation</td><td class="mono">Unable RVSM due [reason]</td><td>ไม่สามารถรักษา RVSM ได้</td></tr>
+                  <tr><td>Fuel emergency</td><td class="mono">MINIMUM FUEL / MAYDAY FUEL</td><td>Minimum=แจ้งเตือน | Mayday Fuel=ฉุกเฉิน</td></tr>
+                  <tr><td>Divert request</td><td class="mono">Request divert to [ICAO] due [reason]</td><td>ขอเบี่ยงลงสนามบินอื่น</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">📻 Communication Systems</div>
+              <table>
+                <thead><tr><th>ระบบ</th><th>ความถี่</th><th>ใช้สำหรับ</th></tr></thead>
+                <tbody>
+                  <tr><td><b>VHF COM</b></td><td class="mono">118–137 MHz</td><td>ATC ระยะใกล้ (Line of Sight ~200NM)</td></tr>
+                  <tr><td><b>HF COM</b></td><td class="mono">3–30 MHz</td><td>Oceanic/Remote — ระยะไกลข้ามมหาสมุทร</td></tr>
+                  <tr><td><b>SELCAL</b></td><td class="mono">HF/VHF</td><td>ATC เรียก Aircraft โดยตรง — ไม่ต้อง monitor ตลอด</td></tr>
+                  <tr><td><b>ACARS</b></td><td class="mono">VHF Data</td><td>Digital datalink: ATC clearance, WX, ATIS, OOOI</td></tr>
+                  <tr><td><b>SATCOM</b></td><td class="mono">Satellite</td><td>Oceanic: voice/data ไม่มีข้อจำกัด LOS</td></tr>
+                  <tr><td><b>ELT</b></td><td class="mono">406 MHz</td><td>Emergency Locator — Satellite detection</td></tr>
+                  <tr><td><b>Guard</b></td><td class="mono">121.5 / 243.0 MHz</td><td>VHF/UHF Emergency — ทุก AC รับฟังตลอด</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🔢 SSR Transponder Codes</div>
+              <table>
+                <thead><tr><th>Code</th><th>ความหมาย</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono" style="color:var(--red)">7700</td><td>Emergency</td><td>Squawk ทันทีเมื่อ Emergency</td></tr>
+                  <tr><td class="mono" style="color:var(--amber)">7600</td><td>Radio Failure (NORDO)</td><td>บินตาม Lost Comms procedure</td></tr>
+                  <tr><td class="mono" style="color:var(--red)">7500</td><td>Unlawful Interference (Hijack)</td><td>กด discrete — ไม่แจ้งใครบนเครื่อง</td></tr>
+                  <tr><td class="mono">2000</td><td>Default — ยังไม่ได้รับ ATC squawk</td><td>ใช้เมื่อเข้าสู่น่านฟ้า controlled</td></tr>
+                  <tr><td class="mono">1200</td><td>VFR (USA)</td><td>สำหรับ VFR flights ในสหรัฐ</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🗺 Airspace Classification (ICAO)</div>
+              <table>
+                <thead><tr><th>Class</th><th>Type</th><th>Service</th><th>ผลต่อ Ops</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono" style="color:var(--blue)">A</td><td>IFR only</td><td>ATC Full Separation</td><td>ต้องมี Clearance เสมอ</td></tr>
+                  <tr><td class="mono" style="color:var(--blue)">B</td><td>IFR+VFR</td><td>ATC Full Separation</td><td>Terminal areas ใหญ่</td></tr>
+                  <tr><td class="mono" style="color:var(--green)">C</td><td>IFR+VFR</td><td>IFR-IFR + IFR-VFR Sep</td><td>Class C approach</td></tr>
+                  <tr><td class="mono" style="color:var(--green)">D</td><td>IFR+VFR</td><td>IFR-IFR Sep + Info</td><td>สนามบินทั่วไป</td></tr>
+                  <tr><td class="mono" style="color:var(--amber)">E</td><td>IFR+VFR</td><td>IFR-IFR Sep only</td><td>En-route บางพื้นที่</td></tr>
+                  <tr><td class="mono" style="color:var(--amber)">F</td><td>IFR+VFR</td><td>Advisory only</td><td>ไม่ค่อยใช้</td></tr>
+                  <tr><td class="mono" style="color:var(--text2)">G</td><td>Uncontrolled</td><td>Flight Info only</td><td>ไม่มี ATC separation</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">📋 ATIS & Pre-departure Information</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ATIS (Automatic Terminal Information Service)</b><br>
+                ออกอากาศข้อมูลสนามบิน: Runway ใช้งาน, QNH, อากาศ, NOTAMs สำคัญ<br>
+                อัปเดตทุกชั่วโมงหรือเมื่ออากาศเปลี่ยน | ใช้ Letter Code (Alpha/Bravo...)<br><br>
+                <b style="color:var(--text)">D-ATIS</b> — Digital ATIS ผ่าน ACARS<br>
+                <b style="color:var(--text)">DCL (Datalink Clearance)</b> — รับ ATC Clearance ผ่าน ACARS ไม่ต้องใช้ Voice<br>
+                <b style="color:var(--text)">PDC (Pre-Departure Clearance)</b> — อีกรูปแบบของ Departure Clearance ผ่าน Data
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⏱ ATC Time-related Clearances</div>
+              <table>
+                <thead><tr><th>Term</th><th>ความหมาย</th></tr></thead>
+                <tbody>
+                  <tr><td><b>CTOT</b></td><td>Calculated Takeoff Time — เวลาบินขึ้นที่ ATFM กำหนด (±5 นาที)</td></tr>
+                  <tr><td><b>EOBT</b></td><td>Estimated Off-Block Time — เวลาออกจาก Gate ที่คาดการณ์</td></tr>
+                  <tr><td><b>ELDT</b></td><td>Estimated Landing Time</td></tr>
+                  <tr><td><b>ATFM Slot</b></td><td>Flow Management — ต้องบินขึ้นภายใน CTOT ±5 นาที</td></tr>
+                  <tr><td><b>EDCT</b></td><td>Expect Departure Clearance Time (FAA/USA)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERNATIONAL OPS -->
+      <div class="dsp-pane" id="dpane-intl">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">✈ RVSM — Reduced Vertical Separation Minima</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">RVSM คืออะไร:</b> ลด Vertical Separation จาก 2,000ft เป็น 1,000ft ระหว่าง FL290–FL410<br>
+                เพิ่มความจุน่านฟ้า ให้เลือก Optimal FL ได้มากขึ้น
+              </div>
+              <table>
+                <thead><tr><th>Item</th><th>ข้อกำหนด</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Aircraft</b></td><td>RVSM Approval ใน AOC + Altimetry accuracy ±60ft</td></tr>
+                  <tr><td><b>Crew</b></td><td>RVSM Training ครบ</td></tr>
+                  <tr><td><b>Monitoring</b></td><td>AAIM หรือ GPS Altitude Monitoring</td></tr>
+                  <tr><td><b>FPL</b></td><td>ระบุ W ใน Field 10 (Equipment) ของ FPL</td></tr>
+                  <tr><td><b>Non-RVSM AC</b></td><td>บินได้เฉพาะ ≤FL280 หรือ ≥FL430 ในพื้นที่ RVSM</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🛰 ETOPS — Extended Operations</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ETOPS 120:</b> บิน Twin-engine ห่างจาก Adequate Airport ≤120 นาที<br>
+                <b style="color:var(--text)">ETOPS 180:</b> ≤180 นาที — ส่วนใหญ่ Oceanic routes<br>
+                <b style="color:var(--text)">ETOPS 240/330:</b> Long-range Twin-engine operations<br><br>
+                <b style="color:var(--amber)">Dispatcher ต้องตรวจ ETOPS Airport:</b><br>
+                • อากาศ ≥ ETOPS Weather Minima ที่ ETA<br>
+                • RFFS พร้อม + ATC ให้บริการตลอด<br>
+                • Fuel พร้อมในกรณีต้อง Divert<br>
+                • Critical Fuel Scenario คำนวณครบ
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🌊 Oceanic Operations</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">OTS (Organized Track System):</b> North Atlantic Tracks — เปลี่ยนทุกวัน<br>
+                <b style="color:var(--text)">PACOTS:</b> Pacific Organized Track System<br><br>
+                <b style="color:var(--amber)">Oceanic Procedures:</b><br>
+                • Position Reporting ทุก 10° Longitude หรือ Waypoint<br>
+                • HF Radio / SATCOM บังคับ<br>
+                • SELCAL Check ก่อนเข้า Oceanic<br>
+                • Strategic Lateral Offset Procedure (SLOP) ±1 หรือ ±2 NM<br>
+                • MNPS/RNAV 10 requirement<br><br>
+                <b style="color:var(--text)">Mach Number Technique:</b> รักษา Speed เพื่อ Longitudinal separation
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🗺 FIR ที่เกี่ยวข้องกับ K-Mile Operations</div>
+              <table>
+                <thead><tr><th>FIR</th><th>ICAO</th><th>ประเทศ</th><th>ภาษา ATC</th></tr></thead>
+                <tbody>
+                  <tr><td>Bangkok</td><td class="mono">VTBB</td><td>Thailand</td><td>English/Thai</td></tr>
+                  <tr><td>Ho Chi Minh</td><td class="mono">VVHM</td><td>Vietnam</td><td>English</td></tr>
+                  <tr><td>Singapore</td><td class="mono">WSSS</td><td>Singapore</td><td>English</td></tr>
+                  <tr><td>Kuala Lumpur</td><td class="mono">WMFC</td><td>Malaysia</td><td>English</td></tr>
+                  <tr><td>Hong Kong</td><td class="mono">VHHK</td><td>China (HK)</td><td>English/Chinese</td></tr>
+                  <tr><td>Guangzhou</td><td class="mono">ZGZU</td><td>China</td><td>English/Chinese</td></tr>
+                  <tr><td>Dubai (UAE)</td><td class="mono">OMAE</td><td>UAE</td><td>English</td></tr>
+                  <tr><td>Dhaka</td><td class="mono">VGFR</td><td>Bangladesh</td><td>English</td></tr>
+                  <tr><td>Kolkata</td><td class="mono">VECF</td><td>India</td><td>English</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">📋 International Documents Required</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ก่อนบินระหว่างประเทศ Dispatcher ต้องตรวจ:</b><br>
+                <span style="color:var(--green)">✓</span> Aircraft Certificate of Registration + C of A<br>
+                <span style="color:var(--green)">✓</span> AOC validity + Route authorization<br>
+                <span style="color:var(--green)">✓</span> Overflight permits (Diplomatic clearance)<br>
+                <span style="color:var(--green)">✓</span> Landing permits ที่ Destination + Alternate<br>
+                <span style="color:var(--green)">✓</span> Crew documents (Passport, License, Medical, Visa)<br>
+                <span style="color:var(--green)">✓</span> Dangerous Goods declaration (ถ้ามี)<br>
+                <span style="color:var(--green)">✓</span> General Declaration (GenDec)<br>
+                <span style="color:var(--green)">✓</span> Cargo Manifest + Airway Bill
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⏰ Time Zones สำคัญ</div>
+              <table>
+                <thead><tr><th>เมือง/สนามบิน</th><th>Time Zone</th><th>UTC Offset</th></tr></thead>
+                <tbody>
+                  <tr><td>Bangkok (VTBS)</td><td>ICT</td><td class="mono">UTC+7</td></tr>
+                  <tr><td>Singapore (WSSS)</td><td>SGT</td><td class="mono">UTC+8</td></tr>
+                  <tr><td>Hong Kong (VHHH)</td><td>HKT</td><td class="mono">UTC+8</td></tr>
+                  <tr><td>Dubai (OMDB)</td><td>GST</td><td class="mono">UTC+4</td></tr>
+                  <tr><td>Dhaka (VGEG)</td><td>BST</td><td class="mono">UTC+6</td></tr>
+                  <tr><td>Kolkata (VECC)</td><td>IST</td><td class="mono">UTC+5:30</td></tr>
+                  <tr><td>Seoul (RKSS)</td><td>KST</td><td class="mono">UTC+9</td></tr>
+                  <tr><td>Guangzhou (ZGGG)</td><td>CST</td><td class="mono">UTC+8</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGULATIONS -->
+      <div class="dsp-pane" id="dpane-legal">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">⚖ ICAO Annexes ที่สำคัญสำหรับ Dispatcher</div>
+              <table>
+                <thead><tr><th>Annex</th><th>เรื่อง</th><th>ใช้งาน</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">Annex 2</td><td>Rules of the Air</td><td>VFR/IFR rules, Right of Way</td></tr>
+                  <tr><td class="mono">Annex 3</td><td>Meteorological Service</td><td>METAR TAF SIGMET format</td></tr>
+                  <tr><td class="mono"><b style="color:var(--blue)">Annex 6</b></td><td><b>Operation of Aircraft</b></td><td><b>Dispatch rules, Fuel, Alternate — สำคัญที่สุด</b></td></tr>
+                  <tr><td class="mono">Annex 8</td><td>Airworthiness</td><td>MEL/CDL, Airworthiness certificate</td></tr>
+                  <tr><td class="mono">Annex 10</td><td>Aeronautical Telecomm.</td><td>Nav aids frequencies</td></tr>
+                  <tr><td class="mono">Annex 11</td><td>Air Traffic Services</td><td>ATC procedures, Airspace</td></tr>
+                  <tr><td class="mono">Annex 12</td><td>Search and Rescue</td><td>Emergency phases, SAR</td></tr>
+                  <tr><td class="mono">Annex 15</td><td>Aeronautical Info Services</td><td>NOTAM, AIP, AIC</td></tr>
+                  <tr><td class="mono">Annex 16</td><td>Environmental Protection</td><td>Noise, Emissions</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🇹🇭 CAAT Regulations (Thailand)</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">Civil Aviation Authority of Thailand (CAAT)</b><br><br>
+                <b>Thai Aviation Act:</b> พระราชบัญญัติการเดินอากาศ พ.ศ. 2497 (แก้ไขเพิ่มเติม)<br>
+                <b>CAAT-OPS-1:</b> Large Aeroplane Air Operations (เทียบ ICAO Annex 6)<br>
+                <b>CAAT-FCL:</b> Flight Crew Licensing<br>
+                <b>AOC:</b> Air Operator Certificate — K-Mile ต้องรักษา compliance ตลอด<br><br>
+                <b style="color:var(--amber)">FDP Rules (CAAT):</b><br>
+                Maximum FDP ขึ้นกับ Crew composition, Departure time, Augmentation<br>
+                Rest Period ขั้นต่ำ 12 ชั่วโมงก่อน Duty<br>
+                Dispatcher ต้องตรวจสอบ Crew FDP ก่อน Release ทุกเที่ยว
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📋 MEL — Minimum Equipment List</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">MEL คืออะไร:</b> รายการอุปกรณ์ที่สามารถใช้งานในสภาพบกพร่องได้ ภายใต้เงื่อนไขที่กำหนด<br><br>
+                <b style="color:var(--blue)">MEL Categories:</b><br>
+                <table style="margin-top:6px">
+                  <thead><tr><th>Cat</th><th>ระยะเวลาแก้ไข</th><th>ความหมาย</th></tr></thead>
+                  <tbody>
+                    <tr><td class="mono" style="color:var(--red)">A</td><td>ตามที่ระบุใน MEL</td><td>ต้องแก้ไขก่อนบินครั้งถัดไป</td></tr>
+                    <tr><td class="mono" style="color:var(--amber)">B</td><td>3 calendar days</td><td>แก้ไขภายใน 3 วัน</td></tr>
+                    <tr><td class="mono" style="color:var(--green)">C</td><td>10 calendar days</td><td>แก้ไขภายใน 10 วัน</td></tr>
+                    <tr><td class="mono" style="color:var(--blue)">D</td><td>120 calendar days</td><td>แก้ไขภายใน 120 วัน</td></tr>
+                  </tbody>
+                </table>
+                <div style="margin-top:8px">
+                  <b style="color:var(--amber)">Dispatcher Role:</b> ตรวจ MEL items ว่า Go/No-Go สำหรับ Route และ Weather ที่จะบิน<br>
+                  บาง MEL items มีข้อจำกัดพิเศษ เช่น ห้ามบินในพื้นที่ RVSM หรือ ETOPS
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📊 FDP — Flight Duty Period</div>
+              <table>
+                <thead><tr><th>Crew Config</th><th>Max FDP (Departure time)</th></tr></thead>
+                <tbody>
+                  <tr><td>Basic Crew (2 Pilots)</td><td>กลางวัน: 13ชม. | กลางคืน: 11ชม.</td></tr>
+                  <tr><td>Augmented (3 Pilots)</td><td>สูงสุด 17 ชั่วโมง (มี Rest facility)</td></tr>
+                  <tr><td>Heavy Augmented (4 Pilots)</td><td>สูงสุด 17+ ชั่วโมง</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">Cumulative FDP Limits:</b><br>
+                • 7 hari berturut-turut ไม่เกิน 60 ชั่วโมง<br>
+                • 28 วัน ไม่เกิน 190 ชั่วโมง<br>
+                • 365 วัน ไม่เกิน 1,000 ชั่วโมง (Block Hours)<br><br>
+                <b style="color:var(--amber)">Dispatcher ต้องตรวจ:</b> FDP ของทุก Crew member ก่อน Release
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔒 Security — Dispatcher Awareness</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">Annex 17 — Aviation Security</b><br><br>
+                <span style="color:var(--green)">✓</span> ตรวจสอบ NOTAM ที่เกี่ยวกับ Security threats<br>
+                <span style="color:var(--green)">✓</span> ประสาน Ground Security ถ้ามีข้อกังวล<br>
+                <span style="color:var(--green)">✓</span> Squawk 7500 = Hijack — ไม่ยืนยันทาง Radio<br>
+                <span style="color:var(--green)">✓</span> NOTAM W-series = Military/Restricted Airspace<br>
+                <span style="color:var(--green)">✓</span> รายงาน Security incidents ตาม SMS procedure
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end page-dispatch -->
+
+<div class="page" id="page-nav_aids">
       <div class="page-hd">NAV AIDs — Navigational Aids</div>
       <div class="page-sub">ประวัติและหลักการทำงานของระบบนำทางอากาศ ตั้งแต่อดีตถึงปัจจุบัน</div>
       <div class="card">
@@ -2281,6 +2925,44 @@ function importUserData(){
 }
 
 
+
+
+// ===================== SIDEBAR TOGGLE =====================
+function toggleSidebar() {
+  var layout = document.querySelector('.layout');
+  var btn = document.getElementById('sb-toggle-btn');
+  var hidden = layout.classList.toggle('sb-hidden');
+  if (btn) btn.textContent = hidden ? '▶' : '◀';
+  try { localStorage.setItem('sb_hidden', hidden ? '1' : '0'); } catch(e) {}
+}
+
+function initSidebar() {
+  try {
+    if (localStorage.getItem('sb_hidden') === '1') {
+      var layout = document.querySelector('.layout');
+      var btn = document.getElementById('sb-toggle-btn');
+      layout.classList.add('sb-hidden');
+      if (btn) btn.textContent = '▶';
+    }
+  } catch(e) {}
+}
+
+// ===================== DISPATCH TABS (isolated) =====================
+function showDTab(name, el) {
+  var page = document.getElementById('page-dispatch');
+  if (!page) return;
+  page.querySelectorAll('.dsp-pane').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  // Deactivate both meteo-tab and dsp-tab within dispatch
+  page.querySelectorAll('.meteo-tab, .dsp-tab').forEach(function(t) {
+    t.classList.remove('active');
+  });
+  var target = document.getElementById('dpane-' + name);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
+}
+
 // ===================== METEOROLOGY TABS (isolated) =====================
 function showMTab(name, el) {
   var page = document.getElementById('page-meteo');
@@ -2302,6 +2984,7 @@ function showMTab(name, el) {
 
 // ===================== INIT =====================
 loadState();
+  initSidebar();
 renderFlights();
 renderFAK();
 renderPlanning();

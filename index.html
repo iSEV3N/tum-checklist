@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TUM K-Mile">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d1117">
+<meta name="application-name" content="TUM K-Mile">
+<link rel="manifest" id="pwa-manifest">
+<title>TUM Check List — K-Mile Air</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
+  --border:#30363d;--border2:#484f58;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --blue:#58a6ff;--blue-bg:#1f3a5f;
+  --green:#3fb950;--green-bg:#1a3a2a;
+  --amber:#d29922;--amber-bg:#3d2e00;
+  --red:#f85149;--red-bg:#3d1f1f;
+  --purple:#bc8cff;--purple-bg:#2d1f4e;
+  --teal:#56d364;
+  --accent:#238636;
+  --radius:8px;--radius-lg:12px;
+  --font:'IBM Plex Sans Thai',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
+.layout{display:grid;grid-template-columns:240px 1fr;grid-template-rows:58px 1fr;height:100vh;transition:grid-template-columns 0.25s ease}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px}
+.logo{font-size:18px;font-weight:600;color:var(--text);letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:var(--blue)}
+.badge-live{background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;border:1px solid var(--green)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{color:var(--text2);font-size:13px;font-family:var(--mono)}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto;transition:all 0.25s ease;position:relative}
+.sidebar.collapsed{width:0;min-width:0;overflow:hidden;padding:0;border-right:none}
+.layout.sidebar-collapsed{grid-template-columns:0 1fr}
+.sidebar-toggle{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:200;background:var(--bg2);border:1px solid var(--border);border-left:none;border-radius:0 8px 8px 0;width:22px;height:60px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:left 0.25s ease,background 0.15s}
+.sidebar-toggle:hover{background:var(--bg3);color:var(--text)}
+.layout:not(.sidebar-collapsed) .sidebar-toggle{left:240px}
+.nav-sec{padding:6px 14px 4px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--text2);font-size:14px;transition:all 0.12s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg3);color:var(--blue);border-left-color:var(--blue)}
+.main{overflow-y:auto;padding:20px;background:var(--bg)}
+.page{display:none}.page.active{display:block}
+.page-hd{font-size:22px;font-weight:600;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:16px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:10px}
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg4);color:var(--text2);padding:9px 11px;text-align:left;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
+td{padding:9px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:hover td{background:var(--bg3)}
+.mono{font-family:var(--mono);font-size:12px}
+.tag{display:inline-block;font-size:11px;padding:3px 7px;border-radius:4px;font-weight:500;white-space:nowrap}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-purple{background:var(--purple-bg);color:var(--purple)}
+.inp{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;width:100%}
+.inp:focus{border-color:var(--blue)}
+.inp-sm{width:80px}
+select.inp{cursor:pointer}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.12s;white-space:nowrap}
+.btn:hover{opacity:0.85}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--text2);color:var(--text)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bg)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bg)}
+.btn-blue:hover{background:var(--blue);color:#000}
+.info-box{background:var(--blue-bg);border:1px solid var(--blue);border-radius:7px;padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--blue)}
+.warn-box{background:var(--amber-bg);border:1px solid var(--amber);border-radius:7px;padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--amber)}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px}
+.stat-val{font-size:22px;font-weight:600;font-family:var(--mono)}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;margin-top:1px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.tbl-wrap{overflow-x:auto}
+.progress-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:5px}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.3s}
+/* Daily flight cards */
+.flight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px;margin-bottom:14px}
+.fc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color 0.2s}
+.fc-crew{border-left:4px solid var(--blue);background:linear-gradient(90deg,rgba(31,58,95,0.18) 0%,transparent 60%)}
+.fc-mel-banner{display:flex;align-items:center;gap:8px;background:rgba(210,153,34,0.13);border-top:1px solid rgba(210,153,34,0.3);padding:7px 12px;font-size:12px}
+.fc-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer}
+.fc-head:hover{background:var(--bg3)}
+.fc-no{font-size:17px;font-weight:600;font-family:var(--mono);color:var(--blue)}
+.fc-route{font-size:15px;font-weight:500;margin-left:2px}
+.fc-times{font-size:12px;color:var(--text2);font-family:var(--mono);margin-left:auto}
+.fc-body{padding:12px 14px}
+.fc-row{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin-bottom:8px;font-size:13px}
+.fc-label{color:var(--text3);font-size:12px}
+.cl-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cl-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:7px 3px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);transition:all 0.12s}
+.cl-item:hover{border-color:var(--border2)}
+.cl-item.done{background:var(--green-bg);border-color:var(--green)}
+.cl-tick{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.12s}
+.cl-item.done .cl-tick{background:var(--green);border-color:var(--green);color:#000}
+.cl-lbl{font-size:11px;color:var(--text3);text-align:center;font-weight:500}
+.cl-item.done .cl-lbl{color:var(--green)}
+.edit-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.edit-row label{font-size:12px;color:var(--text2);min-width:90px;flex-shrink:0}
+/* mel status */
+.mel-inp{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 9px;color:var(--amber);font-family:var(--mono);font-size:12px;width:120px;outline:none}
+.mel-inp:focus{border-color:var(--amber)}
+.mel-inp::placeholder{color:var(--text3)}
+/* Runway closed display */
+.rwy-badge{display:inline-block;background:var(--red-bg);border:1px solid var(--red);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--red);font-family:var(--mono);margin:1px}
+/* Planning colors */
+.plan-select{padding:7px 9px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;font-family:var(--font);cursor:pointer;outline:none;width:100%}
+.plan-none{background:var(--bg3);color:var(--text2)}
+.plan-a{background:#3d2e00;border-color:#d29922;color:#d29922}
+.plan-b{background:#0f3a2a;border-color:#3fb950;color:#3fb950}
+.plan-na{background:#3d1f1f;border-color:#f85149;color:#f85149}
+/* Slot */
+.slot-col{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px}
+.slot-type-badge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.code-blk{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.9;overflow-x:auto;white-space:pre}
+.kw{color:var(--blue)}.val{color:var(--green)}.cm{color:var(--text3)}.hl{color:var(--amber)}
+.ref-card{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px}
+.ref-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.ref-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ref-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);gap:6px}
+.ref-row:last-child{border-bottom:none}
+.ref-k{color:var(--text2);flex-shrink:0}
+.ref-v{color:var(--text);font-family:var(--mono);text-align:right}
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+/* Payload */
+.result-box{background:var(--green-bg);border:1px solid var(--green);border-radius:8px;padding:12px;margin-top:12px}
+.result-lbl{font-size:12px;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.result-val{font-size:26px;font-weight:600;font-family:var(--mono);color:var(--green)}
+.limit-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;font-size:11px}
+.limit-cell{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+.limit-cell .lc-lbl{color:var(--text3);font-size:10px}
+.limit-cell .lc-val{font-family:var(--mono);color:var(--text)}
+.limit-cell.binding{border-color:var(--green);background:var(--green-bg)}
+.limit-cell.binding .lc-val{color:var(--green);font-weight:600}
+/* modals */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:20px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.form-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.form-row label{font-size:13px;color:var(--text2);min-width:120px;flex-shrink:0}
+.form-row .inp{flex:1}
+.form-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+/* fak/mel summary */
+.fak-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.fak-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px}
+.fak-reg{font-size:16px;font-weight:600;font-family:var(--mono);color:var(--blue);margin-bottom:6px}
+.fak-row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;border-bottom:1px solid var(--border)}
+.fak-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="topbar">
+    <div class="logo">K-MILE <span>TUM</span></div>
+    <div class="badge-live">● LIVE</div>
+    <div class="clock" id="clock">—</div>
+    <div class="topbar-right">
+      <span style="font-size:11px;color:var(--text3)">S26</span>
+      <button class="btn btn-sm btn-outline" onclick="exportUserData()" title="บันทึกข้อมูลก่อน Update">💾 Export</button>
+      <button class="btn btn-sm btn-outline" onclick="importUserData()" title="นำเข้าข้อมูลหลัง Update">📂 Import</button>
+      <button class="btn btn-sm" id="install-btn" onclick="installApp()" style="display:none;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple);font-size:11px">📲 ติดตั้ง App</button>
+      <button class="btn btn-sm" onclick="clearChecks()" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bg)">🗑 ล้าง Check</button>
+      <button class="btn btn-blue btn-sm" onclick="openAddFlight()">+ เที่ยวบิน</button>
+    </div>
+  </div>
+
+  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="ซ่อน/แสดงเมนู">◀</button>
+  <div class="sidebar" id="sidebar">
+    <div class="nav-sec">Operations</div>
+    <div class="nav-item active" onclick="nav('daily',this)">✈ &nbsp;Daily Check</div>
+    <div class="nav-item" onclick="nav('fak',this)">📦 &nbsp;FAK / MEL</div>
+    <div class="nav-item" onclick="nav('payload',this)">⚖ &nbsp;Payload Calc</div>
+    <div class="nav-sec">Reference</div>
+    <div class="nav-item" onclick="nav('slot',this)">📡 &nbsp;SLOT / SCR</div>
+    <div class="nav-item" onclick="nav('planning',this)">🌦 &nbsp;Planning Min.</div>
+    <div class="nav-item" onclick="nav('dispatch',this)">🗺 &nbsp;Dispatch</div>
+    <div class="nav-sec">Study</div>
+    <div class="nav-item" onclick="nav('nav_aids',this)">🛰 &nbsp;NAV AIDs</div>
+    <div class="nav-item" onclick="nav('pnr',this)">⛽ &nbsp;PNR / Fuel</div>
+  </div>
+
+  <div class="main">
+
+    <!-- ===== DAILY ===== -->
+    <div class="page active" id="page-daily">
+      <div class="page-hd">Daily Check List</div>
+      <div class="page-sub">กดที่รายการ Check เพื่อ ✓ | กด ✏ เพื่อแก้ไข | กด + เพื่อเพิ่มเที่ยวบิน </div>
+      <div class="flight-grid" id="flight-grid"></div>
+      <div class="info-box" style="margin-top:4px">WSSS : RWY 02R/20L — NA &nbsp;|&nbsp; ทุกเวลาเป็น UTC</div>
+    </div>
+
+    <!-- ===== FAK / MEL ===== -->
+    <div class="page" id="page-fak">
+      <div class="page-hd">FAK / MEL Status</div>
+      <div class="page-sub">First Aid Kit limit และ MEL (Minimum Equipment List) ต่อ Registration</div>
+      <div class="fak-grid" id="fak-grid"></div>
+      <div class="card" style="margin-top:4px">
+        <div class="card-title">📋 Normal Check List</div>
+        <div class="sec-grid">
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600">Morning Shift</div>
+            <div id="cl-morning"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600">Night Shift</div>
+            <div id="cl-night"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠ Abnormal Check List</div>
+        <div id="cl-abnormal"></div>
+      </div>
+      <div class="warn-box">FOF SF KUL-SZX : กรณีล่าช้า SF ต้องแจ้งล่วงหน้า 2 ชั่วโมงก่อน STD via E-mail / Wechat / WhatsApp | Delay ต้องไม่เกิน 30 นาทีจาก STD</div>
+    </div>
+
+    <!-- ===== PAYLOAD ===== -->
+    <div class="page" id="page-payload">
+      <div class="page-hd">Payload / MTL Calculator</div>
+      <div class="page-sub">คำนวณ Maximum Traffic Load — เลือก REG เพื่อโหลดข้อมูลเครื่องบิน</div>
+      <div class="sec-grid">
+        <div>
+          <div class="card">
+            <div class="card-title">⚙ Aircraft Selection</div>
+            <div class="form-row"><label>Registration</label>
+              <select class="inp" id="ac_sel" onchange="fillAC()">
+                <option value="KMA">KMA — B747-400BCF (lbs)</option>
+                <option value="KMB">KMB — B747-400BCF (lbs)</option>
+                <option value="KMD">KMD — B737-800F (kg)</option>
+                <option value="KME">KME — B737-800F (kg)</option>
+                <option value="KSA">KSA — B767-300F (kg)</option>
+                <option value="KSB">KSB — B767-300F (kg)</option>
+              </select>
+            </div>
+            <div style="background:var(--bg3);border-radius:6px;padding:8px;font-size:11px;color:var(--text2);margin-bottom:10px" id="ac-info"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">⚙ Input Data</div>
+            <div class="form-row"><label>Crew Onboard</label><input class="inp inp-sm" type="number" id="p_crew" value="3" min="1" oninput="onCrewChange()"></div>
+            <div class="form-row"><label id="lbl_dow">DOW (kg)</label><input class="inp inp-sm" type="number" id="p_dow" oninput="calcPayload()" style="color:var(--amber)"></div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:8px;margin-left:98px">Dry Operating Weight รวม Crew</div>
+            <div class="form-row"><label id="lbl_ramp">Ramp Fuel (kg)</label><input class="inp inp-sm" type="number" id="p_ramp" oninput="calcPayload()"></div>
+            <div class="form-row"><label id="lbl_trip">Trip Fuel (kg)</label><input class="inp inp-sm" type="number" id="p_trip" oninput="calcPayload()"></div>
+            <div class="form-row"><label id="lbl_taxi">Taxi Fuel (kg)</label><input class="inp inp-sm" type="number" id="p_taxi" oninput="calcPayload()"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🏗 Structural Limits</div>
+            <div class="form-row"><label id="lbl_mszfw">MSZFW (kg)</label><input class="inp inp-sm" type="number" id="p_mszfw" oninput="calcPayload()"></div>
+            <div class="form-row"><label id="lbl_mstow">MSTOW (kg)</label><input class="inp inp-sm" type="number" id="p_mstow" oninput="calcPayload()"></div>
+            <div class="form-row"><label id="lbl_mslw">MSLW (kg)</label><input class="inp inp-sm" type="number" id="p_mslw" oninput="calcPayload()"></div>
+            <div class="card-title" style="margin-top:10px">⚡ Performance Limits</div>
+            <div class="form-row"><label id="lbl_pltow">PLTOW (kg)</label><input class="inp inp-sm" type="number" id="p_pltow" oninput="calcPayload()"></div>
+            <div class="form-row"><label id="lbl_pllw">PLLW (kg)</label><input class="inp inp-sm" type="number" id="p_pllw" oninput="calcPayload()"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">📊 Calculation Result</div>
+            <div id="payload-result"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📖 Weight Reference — ข้อมูลอัปเดต</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>REG</th><th>Type</th><th>Base OEW (kg)</th><th>Crew Wt/คน</th><th>MSZFW</th><th>MSTOW</th><th>MSLW</th><th>Taxi</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">KMA</td><td>B747-400BCF</td><td class="mono">71,939</td><td class="mono tag tag-amber">220 lbs</td><td class="mono">117,000</td><td class="mono">150,000</td><td class="mono">124,000</td><td class="mono">441</td></tr>
+                  <tr><td class="mono">KMB</td><td>B747-400BCF</td><td class="mono">72,510</td><td class="mono tag tag-amber">220 lbs</td><td class="mono">117,000</td><td class="mono">150,000</td><td class="mono">124,000</td><td class="mono">441</td></tr>
+                  <tr><td class="mono">KMD</td><td>B737-800F</td><td class="mono">39,327</td><td class="mono tag tag-green">100 kg</td><td class="mono">61,688</td><td class="mono">71,894</td><td class="mono">65,317</td><td class="mono">200</td></tr>
+                  <tr><td class="mono">KME</td><td>B737-800F</td><td class="mono">38,885</td><td class="mono tag tag-green">100 kg</td><td class="mono">61,688</td><td class="mono">77,564</td><td class="mono">65,317</td><td class="mono">200</td></tr>
+                  <tr><td class="mono">KSA</td><td>B767-300F</td><td class="mono">83,183</td><td class="mono tag tag-green">100 kg</td><td class="mono">140,160</td><td class="mono">184,221</td><td class="mono">147,871</td><td class="mono">700</td></tr>
+                  <tr><td class="mono">KSB</td><td>B767-300F</td><td class="mono">83,786</td><td class="mono tag tag-green">100 kg</td><td class="mono">140,160</td><td class="mono">184,221</td><td class="mono">147,871</td><td class="mono">700</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:6px">
+              * DOW คำนวณอัตโนมัติ = Base OEW + Crew × Crew WT &nbsp;|&nbsp; KMA/KMB: Crew WT = 220 lbs/คน (99.79 kg) · KMD/KME/KSA/KSB: 100 kg/คน<br>
+              * PLTOW/PLLW = Full Performance limit (ยังไม่รวม Temp/Runway/Wind correction)
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">📊 MATOW / Traffic Load / Underload</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px">เปรียบเทียบ 3 ด้าน (ZFW/TOW/LDW) ตามคู่มือ K-Mile Asia</div>
+            <div id="underload-result"></div>
+            <div style="margin-top:12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Actual Traffic Load (สินค้า+Mail จริง)</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input class="inp" type="number" id="p_actual" placeholder="0" oninput="calcPayload()" style="width:150px;font-size:15px;font-weight:600">
+                <span id="lbl_actual" style="font-size:13px;color:var(--text3)">kg</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🧮 สูตรคำนวณ (ตรวจสอบจาก CUMPUTE Sheet)</div>
+            <div style="font-size:11px;color:var(--text2);line-height:2.2;font-family:var(--mono)">
+              DOW &nbsp;= Base OEW + Crew × 85 kg<br>
+              TOF &nbsp;= Ramp Fuel − Taxi Fuel<br>
+              LDF &nbsp;= TOF − Trip Fuel<br>
+              ALW &nbsp;= min(MSLW, PLLW)<br>
+              <span style="color:var(--text3)">─── ATW paths (ใช้ค่าน้อยสุด) ───</span><br>
+              ATW₁ = ALW + Trip Fuel<br>
+              ATW₂ = MSZFW + TOF<br>
+              ATW₃ = min(MSTOW, PLTOW)<br>
+              ATW &nbsp;= min(ATW₁, ATW₂, ATW₃)<br>
+              <span style="color:var(--green)">AZFW = ATW − TOF<br>
+              MTL &nbsp;= AZFW − DOW</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SLOT ===== -->
+    <div class="page" id="page-slot">
+      <div class="page-hd">SLOT Reference — IATA WSG</div>
+      <div class="page-sub">SCR / GCR Message Format & Quick Reference ครบถ้วน</div>
+      <div class="info-box">⚠ ทุก Time ในข้อความ SCR/GCR ต้องเป็น UTC เท่านั้น</div>
+      <div class="sec-grid" style="margin-bottom:14px">
+        <!-- SCR New -->
+        <div class="slot-col">
+          <span class="slot-type-badge tag-blue">SCR — New (N)</span>
+          <div class="code-blk"><span class="kw">SCR</span>                <span class="cm">&lt;Message Type&gt;</span>
+<span class="hl">S26</span>               <span class="cm">&lt;ฤดูกาล: S=Summer W=Winter + ปี 2 หลัก&gt;</span>
+<span class="hl">19OCT</span>             <span class="cm">&lt;วันที่ส่งข้อความ DDMMM&gt;</span>
+<span class="hl">BKK</span>               <span class="cm">&lt;IATA Airport Code ที่ขอ Slot&gt;</span>
+
+<span class="val">N</span> <span class="kw">8K8XX 8K8YY</span> <span class="hl">30MAR26OCT</span> <span class="hl">1010101</span> <span class="val">000737</span> <span class="kw">VTBS</span><span class="val">0100</span> <span class="val">0200</span><span class="kw">VTBS</span> FF
+<span class="cm">SI ALL TIMES UTC.</span>
+<span class="cm">GI BRGDS/KITTIPHOP C.</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.8">
+            <b style="color:var(--text2)">N</b> = New Request &nbsp;|&nbsp; <b style="color:var(--amber)">8K8XX</b> = Flight No.ขาเข้า &nbsp;|&nbsp; <b style="color:var(--amber)">8K8YY</b> = ขาออก<br>
+            <b style="color:var(--amber)">30MAR26OCT</b> = Period Start/End &nbsp;|&nbsp; <b style="color:var(--amber)">1010101</b> = วันบิน (จ-อ-พ-พฤ-ศ-ส-อา)<br>
+            <b style="color:var(--green)">000737</b> = Seats(000)+IATA AC Type(737=B737) &nbsp;|&nbsp; <b style="color:var(--blue)">VTBS0100</b> = Origin+ArrTime<br>
+            <b style="color:var(--green)">0200VTBS</b> = DepTime+Dest &nbsp;|&nbsp; <b>FF</b> = Service Type (All Cargo Sched.)
+          </div>
+        </div>
+        <!-- SCR Change -->
+        <div class="slot-col">
+          <span class="slot-type-badge tag-amber">SCR — Change (C) / Revise (R)</span>
+          <div class="code-blk"><span class="kw">SCR</span>
+<span class="hl">S26</span>
+<span class="hl">19OCT</span>
+<span class="hl">BKK</span>
+
+<span class="cm">Slot เดิม (C = Change):</span>
+<span class="val">C</span> 8K8XX 8K8YY 30MAR26OCT 1010101 <span class="val">000737</span> <span class="kw">VTBS</span>0100 0200<span class="kw">VTBS</span> FF
+
+<span class="cm">Slot ที่ขอใหม่ (R = Revise):</span>
+<span class="val">R</span> 8K8XX 8K8YY 30MAR26OCT 1010101 <span class="val">000737</span> <span class="kw">VTBS</span>0115 0215<span class="kw">VTBS</span> FF
+
+<span class="cm">SI REQ 15 MIN LATER ARR/DEP. ALL TIMES UTC.</span>
+<span class="cm">GI BRGDS/KITTIPHOP C.</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.8">
+            ใช้ C+R คู่กันเสมอ — C คือ Slot เดิม, R คือ Slot ที่ต้องการใหม่<br>
+            SI = Supplementary Info &nbsp;|&nbsp; GI = General Info (ผู้ส่ง)
+          </div>
+        </div>
+      </div>
+      <div class="sec-grid" style="margin-bottom:14px">
+        <!-- SCR Delete -->
+        <div class="slot-col">
+          <span class="slot-type-badge tag-red">SCR — Delete (D)</span>
+          <div class="code-blk"><span class="kw">SCR</span>
+<span class="hl">S26</span>
+<span class="hl">19OCT</span>
+<span class="hl">BKK</span>
+
+<span class="val">D</span> 8K8XX 8K8YY 30MAR26OCT 1010101 <span class="val">000737</span> <span class="kw">VTBS</span>0100 0200<span class="kw">VTBS</span> FF
+
+<span class="cm">SI CANCELLATION OF ENTIRE SERIES. ALL TIMES UTC.</span>
+<span class="cm">GI BRGDS/KITTIPHOP C.</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.8">ยกเลิก Slot ทั้ง Series &nbsp;|&nbsp; ใช้ข้อมูล Slot เดิมทุกตัว</div>
+        </div>
+        <!-- GCR -->
+        <div class="slot-col">
+          <span class="slot-type-badge tag-purple">GCR — General Aviation (ขาเดียว)</span>
+          <div class="code-blk"><span class="kw">GCR</span>                <span class="cm">&lt;General Aviation Request&gt;</span>
+<span class="cm">/HSKMA</span>           <span class="cm">&lt;ทะเบียนเครื่องบิน (เว้นวรรคหน้า)&gt;</span>
+<span class="kw">VTBS</span>              <span class="cm">&lt;ICAO Airport Code&gt;</span>
+
+<span class="cm">New Arrival Slot:</span>
+<span class="val">N</span> HSKMA 20OCT <span class="val">010737</span> <span class="kw">VHHH</span>0430 D
+
+<span class="cm">Change + AC Type Change:</span>
+<span class="val">C</span> HSKMA 20OCT <span class="val">010737</span> <span class="kw">VHHH</span>0430 D
+<span class="val">R</span> HSKMA 20OCT <span class="val">010767</span> <span class="kw">VHHH</span>0430 D
+<span class="cm">SI AIRCRAFT TYPE CHANGE. NO TIME CHANGE.</span>
+<span class="cm">GI BRGDS/KITTIPHOP C.</span></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;line-height:1.8">
+            <b style="color:var(--green)">010737</b> = Seats(010)+ICAO Type(737) &nbsp;|&nbsp; <b style="color:var(--blue)">VHHH0430</b> = ICAO Origin+ArrTime(UTC)<br>
+            <b>D</b> = General Aviation Flight &nbsp;|&nbsp; 010767 = เปลี่ยนเป็น B767
+          </div>
+        </div>
+      </div>
+      <!-- Field decoder -->
+      <div class="card">
+        <div class="card-title">🔍 Field Decoder — แปลความหมายทุก Field ใน SCR/GCR</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Field</th><th>ตัวอย่าง</th><th>ความหมาย</th><th>หมายเหตุ</th></tr></thead>
+            <tbody>
+              <tr><td class="mono kw">SCR / GCR</td><td class="mono">SCR</td><td>Message Type</td><td>SCR=Scheduled ไป-กลับ, GCR=General Aviation ขาเดียว</td></tr>
+              <tr><td class="mono">Season</td><td class="mono hl">S26</td><td>ฤดูกาล</td><td>S=Summer (Mar-Oct), W=Winter (Nov-Feb) + ปี 2 หลัก</td></tr>
+              <tr><td class="mono">Date</td><td class="mono hl">19OCT</td><td>วันที่ส่งข้อความ</td><td>DDMMM (ภาษาอังกฤษ 3 ตัว)</td></tr>
+              <tr><td class="mono">Airport</td><td class="mono hl">BKK / VTBS</td><td>สนามบินที่ขอ Slot</td><td>SCR ใช้ IATA (3 ตัว) | GCR ใช้ ICAO (4 ตัว)</td></tr>
+              <tr><td class="mono">Action</td><td class="mono val">N / C / D / R</td><td>Action Code</td><td>N=New, C=Change(เดิม), D=Delete, R=Revise(ใหม่)</td></tr>
+              <tr><td class="mono">Flight Nos.</td><td class="mono kw">8K801 8K802</td><td>Flight No. ขาเข้า ขาออก</td><td>GCR ใช้ทะเบียน (HSKMA) แทน Flight No.</td></tr>
+              <tr><td class="mono">Period</td><td class="mono hl">30MAR26OCT</td><td>Start Date + End Date</td><td>DDMMMDDMMM ติดกัน ไม่มีเว้นวรรค</td></tr>
+              <tr><td class="mono">Frequency</td><td class="mono hl">1010101</td><td>วันบิน (จ-อ-พ-พฤ-ศ-ส-อา)</td><td>1=บิน, 0=ไม่บิน | 1010101 = จันทร์+พุธ+ศุกร์+อาทิตย์</td></tr>
+              <tr><td class="mono">Seats+IATA</td><td class="mono val">000737</td><td>จำนวนที่นั่ง + IATA Type</td><td>Cargo ใช้ 000 | 737=B737-800, 767=B767-300, 744=B747-400</td></tr>
+              <tr><td class="mono">Arr Slot</td><td class="mono kw">VTBS0100</td><td>Origin ICAO + เวลาถึง UTC</td><td>ICAO(4) + HHMM</td></tr>
+              <tr><td class="mono">Dep Slot</td><td class="mono val">0200VTBS</td><td>เวลาออก UTC + Dest ICAO</td><td>HHMM + ICAO(4)</td></tr>
+              <tr><td class="mono">Service</td><td class="mono">FF / JJ / F / H</td><td>Service Type Code</td><td>FF=All Cargo Sched. | JJ=Pax Sched. | H=Charter</td></tr>
+              <tr><td class="mono">SI</td><td class="mono cm">SI ALL TIMES UTC.</td><td>Supplementary Information</td><td>ข้อมูลเพิ่มเติม เช่น เหตุผลที่เปลี่ยน</td></tr>
+              <tr><td class="mono">GI</td><td class="mono cm">GI BRGDS/NAME</td><td>General Information</td><td>ชื่อผู้ส่ง ระบุหลัง BRGDS/</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="ref-grid">
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--green)"></div>Response Codes</div>
+          <div class="ref-row"><span class="ref-k mono">K</span><span class="ref-v"><span class="tag tag-green">Confirmation ✅</span></span></div>
+          <div class="ref-row"><span class="ref-k mono">X</span><span class="ref-v"><span class="tag tag-red">Cancellation ❌</span></span></div>
+          <div class="ref-row"><span class="ref-k mono">U</span><span class="ref-v"><span class="tag tag-red">Refusal 🚫</span></span></div>
+          <div class="ref-row"><span class="ref-k mono">O</span><span class="ref-v"><span class="tag tag-amber">Offer Alt. 🔄</span></span></div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--blue)"></div>Service Type Codes</div>
+          <div class="ref-row"><span class="ref-k mono">FF</span><span class="ref-v">All Cargo Scheduled</span></div>
+          <div class="ref-row"><span class="ref-k mono">JJ</span><span class="ref-v">Passenger Scheduled</span></div>
+          <div class="ref-row"><span class="ref-k mono">F</span><span class="ref-v">Scheduled Flight</span></div>
+          <div class="ref-row"><span class="ref-k mono">H</span><span class="ref-v">Charter</span></div>
+          <div class="ref-row"><span class="ref-k mono">A</span><span class="ref-v">Additional Flight</span></div>
+          <div class="ref-row"><span class="ref-k mono">L</span><span class="ref-v">Charter (Pax+Cargo)</span></div>
+          <div class="ref-row"><span class="ref-k mono">M</span><span class="ref-v">Mail Only</span></div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--amber)"></div>IATA Aircraft Codes</div>
+          <div class="ref-row"><span class="ref-k">B737-400F</span><span class="ref-v mono">73F / 734</span></div>
+          <div class="ref-row"><span class="ref-k">B737-800F</span><span class="ref-v mono">73H / 738</span></div>
+          <div class="ref-row"><span class="ref-k">B767-300F</span><span class="ref-v mono">76F / 763</span></div>
+          <div class="ref-row"><span class="ref-k">B747-400F</span><span class="ref-v mono">74F / 744</span></div>
+          <div class="ref-row"><span class="ref-k">B747-8F</span><span class="ref-v mono">74N</span></div>
+          <div class="ref-row"><span class="ref-k">B777F</span><span class="ref-v mono">77F</span></div>
+          <div class="ref-row"><span class="ref-k">A330-200F</span><span class="ref-v mono">33X / 33Y</span></div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--purple)"></div>ICAO Aircraft Codes</div>
+          <div class="ref-row"><span class="ref-k">B737-400</span><span class="ref-v mono">B734</span></div>
+          <div class="ref-row"><span class="ref-k">B737-800</span><span class="ref-v mono">B738</span></div>
+          <div class="ref-row"><span class="ref-k">B767-300</span><span class="ref-v mono">B763</span></div>
+          <div class="ref-row"><span class="ref-k">B747-400</span><span class="ref-v mono">B744</span></div>
+          <div class="ref-row"><span class="ref-k">B777</span><span class="ref-v mono">B777</span></div>
+          <div class="ref-row"><span class="ref-k">A330-200</span><span class="ref-v mono">A332</span></div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--teal)"></div>Day of Week Code</div>
+          <div class="ref-row"><span class="ref-k">1</span><span class="ref-v">จันทร์ (Mon)</span></div>
+          <div class="ref-row"><span class="ref-k">2</span><span class="ref-v">อังคาร (Tue)</span></div>
+          <div class="ref-row"><span class="ref-k">3</span><span class="ref-v">พุธ (Wed)</span></div>
+          <div class="ref-row"><span class="ref-k">4</span><span class="ref-v">พฤหัสบดี (Thu)</span></div>
+          <div class="ref-row"><span class="ref-k">5</span><span class="ref-v">ศุกร์ (Fri)</span></div>
+          <div class="ref-row"><span class="ref-k">6</span><span class="ref-v">เสาร์ (Sat)</span></div>
+          <div class="ref-row"><span class="ref-k">7</span><span class="ref-v">อาทิตย์ (Sun)</span></div>
+        </div>
+        <div class="ref-card">
+          <div class="ref-card-title"><div class="ref-dot" style="background:var(--red)"></div>Common SI Phrases</div>
+          <div class="ref-row"><span class="ref-k" style="font-size:10px">New Series</span><span class="ref-v" style="font-size:10px">ALL TIMES UTC.</span></div>
+          <div class="ref-row"><span class="ref-k" style="font-size:10px">Time Change</span><span class="ref-v" style="font-size:10px">REQ X MIN LATER ARR/DEP</span></div>
+          <div class="ref-row"><span class="ref-k" style="font-size:10px">AC Change</span><span class="ref-v" style="font-size:10px">AIRCRAFT TYPE CHANGE. NO TIME CHANGE.</span></div>
+          <div class="ref-row"><span class="ref-k" style="font-size:10px">Delete</span><span class="ref-v" style="font-size:10px">CANCELLATION OF ENTIRE SERIES.</span></div>
+          <div class="ref-row"><span class="ref-k" style="font-size:10px">Del Arr</span><span class="ref-v" style="font-size:10px">CANCELLATION OF ARRIVAL SLOT.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PLANNING ===== -->
+    <div class="page" id="page-planning">
+      <div class="page-hd">Planning Minimums</div>
+      <div class="page-sub">เลือก Plan A / Plan B / N/A แถวจะเปลี่ยนสีอัตโนมัติ | กด ✏ แก้ไขข้อมูล | กด + เพิ่มสนามบิน</div>
+      <div class="sec-grid" style="margin-bottom:12px">
+        <div style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:8px;padding:10px;font-size:12px">
+          <b style="color:var(--amber)">Plan A — "กฎระบบเดี่ยว"</b>
+          <div style="color:var(--text2);margin-top:4px;line-height:1.8">Single Runway / One Facility (ILS หรือ VOR)<br>คำนวณเกณฑ์อากาศจากระบบเดียว | ต้องบวกค่าความปลอดภัยเพิ่ม<br><span style="color:var(--amber)">DA/H + 400 ft &nbsp;|&nbsp; RVR/VIS + 1,500 m</span></div>
+        </div>
+        <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:8px;padding:10px;font-size:12px">
+          <b style="color:var(--green)">Plan B — "กฎระบบคู่แยกอิสระ"</b>
+          <div style="color:var(--text2);margin-top:4px;line-height:1.8">Two Separate Runways &amp; Facilities<br>คำนวณทั้ง 2 ระบบแยกกัน → เลือกค่าสูงกว่า (Higher of the Two)<br><span style="color:var(--green)">DA/H + 200 ft &nbsp;|&nbsp; RVR/VIS + 800 m</span></div>
+        </div>
+      </div>
+      <div style="background:var(--purple-bg);border:1px solid var(--purple);border-radius:8px;padding:10px;font-size:12px;margin-bottom:12px">
+        <b style="color:var(--purple)">Circling Approach</b>
+        <div style="color:var(--text2);margin-top:4px;line-height:1.8">MDA/H + 400 ft &nbsp;|&nbsp; VIS + 1,500 m</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--text2);margin-bottom:12px;line-height:2">
+        <b style="color:var(--text)">⚠ เงื่อนไขการเลือกสนามบินสำรองปลายทาง</b><br>
+        • อากาศ Destination <b style="color:var(--green)">ดีกว่า</b> Planning Minima (ETA ± 1 ชม.) → เลือก Alternate <b style="color:var(--text)">1 แห่ง</b><br>
+        • อากาศ Destination <b style="color:var(--red)">ต่ำกว่า</b> Planning Minima หรือไม่มีข้อมูลอุตุนิยมวิทยาที่แน่ชัด → เลือก Alternate <b style="color:var(--text)">2 แห่ง</b> (ทั้งสองแห่งต้องผ่านเกณฑ์)<br>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><b style="color:var(--amber)">Plan A</b> → ระบบเดี่ยว → บวก DA/H+400 / VIS+1,500 → อากาศต้องดีมากกว่าจึงผ่านเกณฑ์</div>
+          <div><b style="color:var(--green)">Plan B</b> → ระบบคู่แยกกัน → บวก DA/H+200 / VIS+800 → เกณฑ์ต่ำกว่า โอกาสผ่านสูงขึ้น</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="card-title" style="margin-bottom:0">🛬 Airport Alternate Minimums</div>
+          <button class="btn btn-blue btn-sm" onclick="openPlanModal(-1)">+ เพิ่มสนามบิน</button>
+        </div>
+        <div class="tbl-wrap">
+          <table id="planning-table">
+            <thead>
+              <tr>
+                <th style="min-width:110px">Airport</th>
+                <th>ICAO</th>
+                <th>Runway</th>
+                <th>Type</th>
+                <th>DH (ft)</th>
+                <th>VIS (m)</th>
+                <th>Plan A DH</th>
+                <th>Plan A VIS</th>
+                <th>Plan B DH</th>
+                <th>Plan B VIS</th>
+                <th style="min-width:130px">ใช้ Plan</th>
+                <th style="width:36px"></th>
+              </tr>
+            </thead>
+            <tbody id="planning-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANNING EDIT MODAL -->
+    <div class="modal-bg" id="planModal">
+      <div class="modal" style="width:520px">
+        <div class="modal-title">
+          <span id="planModalTitle">เพิ่มสนามบิน</span>
+          <button class="btn btn-outline btn-sm" onclick="closeModal('planModal')">✕</button>
+        </div>
+        <div class="form-row"><label>Airport Name</label><input class="inp" id="pm_ap" placeholder="e.g. Singapore"></div>
+        <div class="form-row"><label>ICAO Code</label><input class="inp" id="pm_icao" placeholder="e.g. WSSS" style="text-transform:uppercase"></div>
+        <div class="form-row"><label>Runway</label><input class="inp" id="pm_rwy" placeholder="e.g. RWY 02"></div>
+        <div class="form-row"><label>Type</label>
+          <select class="inp" id="pm_type">
+            <option value="ILS">ILS</option>
+            <option value="RNP">RNP</option>
+            <option value="VOR">VOR</option>
+            <option value="RNAV">RNAV</option>
+            <option value="NDB">NDB</option>
+          </select>
+        </div>
+        <div class="form-row"><label>DH (ft)</label><input class="inp" id="pm_dh" type="number" placeholder="e.g. 200" oninput="autoCalcPlanAB()"></div>
+        <div class="form-row"><label>VIS (m)</label><input class="inp" id="pm_vis" type="number" placeholder="e.g. 550" oninput="autoCalcPlanAB()"></div>
+        <div style="font-size:10px;color:var(--text3);margin:4px 0 10px 110px">Auto: Plan A = DA/H+400 / VIS+1,500 &nbsp;|&nbsp; Plan B = DA/H+200 / VIS+800 (แก้ไขเองได้)</div>
+        <div class="form-row"><label>Plan A DH</label><input class="inp" id="pm_adh" type="number" placeholder="Auto"></div>
+        <div class="form-row"><label>Plan A VIS</label><input class="inp" id="pm_avis" type="number" placeholder="Auto"></div>
+        <div class="form-row"><label>Plan B DH</label><input class="inp" id="pm_bdh" type="number" placeholder="Auto"></div>
+        <div class="form-row"><label>Plan B VIS</label><input class="inp" id="pm_bvis" type="number" placeholder="Auto"></div>
+        <input type="hidden" id="pm_insert_after" value="-1">
+        <div class="form-actions">
+          <button class="btn btn-danger btn-sm" id="deletePlanBtn" onclick="deletePlanRow()">🗑 ลบ</button>
+          <button class="btn btn-outline btn-sm" onclick="closeModal('planModal')">ยกเลิก</button>
+          <button class="btn btn-sm" onclick="savePlanRow()">💾 บันทึก</button>
+        </div>
+      </div>
+    </div>
+    <!-- ===== DISPATCH ===== -->
+    <div class="page" id="page-dispatch">
+      <div class="page-hd">Dispatch Guide</div>
+      <div class="page-sub">Flight Planning Minimum & Weather Radar Reference</div>
+      <div class="sec-grid">
+        <div>
+          <div class="card">
+            <div class="card-title">☁ Weather Planning Minimum</div>
+            <div style="font-size:12px;line-height:2;color:var(--text2)">
+              <b style="color:var(--blue)">Departure</b><br>
+              • ทัศนวิสัยต้องดีกว่าค่าขั้นต่ำรันเวย์นั้นๆ รวม Takeoff Performance<br><br>
+              <b style="color:var(--blue)">Destination (with Alternate)</b><br>
+              • TAF (ETA ± 1 ชม.) ทัศนวิสัยดีกว่า Landing Minimum<br>
+              • ถ้าพอดี/ต่ำกว่า → ต้องมี Alternate 2 แห่ง<br><br>
+              <b style="color:var(--blue)">Destination (No Alternate)</b><br>
+              • Flight time ≤ 6 ชม. (TAF อาจ Error ถ้าเกิน)<br>
+              • TAF (ETA ± 1 ชม.) VIS > 5–8 km<br>
+              • Ceiling > 2,000 ft AGL<br>
+              • ไม่มีรายงานอากาศต่ำกว่า Landing Minima<br>
+              • 2 Runway แยกกัน + เครื่องช่วยลงจอดเป็นของตัวเอง<br>
+              • NOTAM, ATC, RFFS พร้อม<br><br>
+              <b style="color:var(--blue)">Alternate</b><br>
+              • TAF (ETA ± 1 ชม.) ทัศนวิสัยดีกว่า Alternate Minimum<br>
+              • NOTAM เปิด + มีอุปกรณ์ช่วยเหลือ
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">👁 Visibility Conversion</div>
+            <table><thead><tr><th>Meters</th><th>Feet</th><th>SM</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">550 m</td><td class="mono">1,800 ft</td><td>~0.35</td></tr>
+                <tr><td class="mono">800 m</td><td class="mono">2,600 ft</td><td>~0.5</td></tr>
+                <tr><td class="mono">1,500 m</td><td class="mono">5,000 ft</td><td>~1 SM</td></tr>
+                <tr><td class="mono">5,000 m</td><td class="mono">16,400 ft</td><td>3 SM</td></tr>
+                <tr><td class="mono">8,000 m</td><td class="mono">26,200 ft</td><td>5 SM</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">☁ Cloud Base Reference</div>
+            <table><thead><tr><th>Type</th><th>นับเป็น Ceiling?</th><th>หมายเหตุ</th></tr></thead>
+              <tbody>
+                <tr><td>BKN / OVC</td><td><span class="tag tag-red">= Ceiling</span></td><td>5/8–8/8 อ้อมท้องฟ้า</td></tr>
+                <tr><td>FEW / SCT</td><td><span class="tag tag-green">≠ Ceiling</span></td><td>1/8–4/8 ไม่นับ</td></tr>
+                <tr><td>&lt; 200 ft</td><td><span class="tag tag-red">CAT II/III</span></td><td>ต้องการระบบ Autoland</td></tr>
+                <tr><td>&gt; 2,000 ft</td><td><span class="tag tag-green">No Alt OK</span></td><td>เงื่อนไข No Alternate</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">🌧 Radar Color Guide</div>
+            <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(86,211,100,0.08);border:1px solid rgba(86,211,100,0.25);border-radius:6px">
+                <div style="width:12px;height:12px;background:#4ade80;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
+                <div><b style="color:#4ade80">สีฟ้า/เขียวอ่อน (15–30 dBZ)</b><br><span style="color:var(--text2)">Drizzle / Light Rain / NS — SAFE ผ่านได้ แต่ตรวจสอบ Visibility ปลายทาง</span></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25);border-radius:6px">
+                <div style="width:12px;height:12px;background:#d29922;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
+                <div><b style="color:#d29922">สีเหลือง (35–45 dBZ)</b><br><span style="color:var(--text2)">Moderate Rain / NS กำลังพัฒนาเป็น CB — CAUTION ระวัง Turbulence</span></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:6px">
+                <div style="width:12px;height:12px;background:#f85149;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
+                <div><b style="color:#f85149">สีส้ม/แดง (50–60 dBZ)</b><br><span style="color:var(--text2)">Heavy Rain / CB — AVOID หลีกเลี่ยง มี Turbulence + ฟ้าผ่า</span></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(188,140,255,0.08);border:1px solid rgba(188,140,255,0.25);border-radius:6px">
+                <div style="width:12px;height:12px;background:#bc8cff;border-radius:3px;flex-shrink:0;margin-top:1px"></div>
+                <div><b style="color:#bc8cff">สีม่วง/ชมพู/ขาว (60–65+ dBZ)</b><br><span style="color:var(--text2)">Intense Rain + ลูกเห็บ / Severe CB — SEVERE! ห้ามผ่านเด็ดขาด</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">✈ Decision Guide</div>
+            <table>
+              <thead><tr><th>สภาพอากาศ</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>VIS > Min</td><td><span class="tag tag-green">✅ GO</span></td></tr>
+                <tr><td>VIS = Min (Dest)</td><td><span class="tag tag-amber">⚠ ต้องมี 2 Alternates</span></td></tr>
+                <tr><td>VIS &lt; Min</td><td><span class="tag tag-red">❌ NO GO</span></td></tr>
+                <tr><td>CB on route</td><td><span class="tag tag-amber">🔄 Re-route / Deviate</span></td></tr>
+                <tr><td>Stratiform (เขียว/เหลือง)</td><td><span class="tag tag-blue">ตรวจ Visibility ปลายทาง</span></td></tr>
+                <tr><td>Convective (แดง/ม่วง)</td><td><span class="tag tag-red">ตรวจ Wind Shear / Microburst</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">📝 TAF Validity</div>
+            <table>
+              <thead><tr><th>Term</th><th>ความหมาย</th></tr></thead>
+              <tbody>
+                <tr><td>ETA ± 1 hr</td><td>ช่วงเวลา TAF ที่ต้องดู</td></tr>
+                <tr><td>TEMPO</td><td>เปลี่ยนชั่วคราว &lt;1 ชม.</td></tr>
+                <tr><td>BECMG</td><td>เปลี่ยนถาวรในช่วงเวลาหนึ่ง</td></tr>
+                <tr><td>PROB30/40</td><td>ความน่าจะเป็น 30%/40%</td></tr>
+                <tr><td>Flight &gt;6 ชม.</td><td><span class="tag tag-amber">TAF อาจ Error ระวัง!</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== NAV AIDS ===== -->
+    <div class="page" id="page-nav_aids">
+      <div class="page-hd">NAV AIDs — Navigational Aids</div>
+      <div class="page-sub">ประวัติและหลักการทำงานของระบบนำทางอากาศ ตั้งแต่อดีตถึงปัจจุบัน</div>
+      <div class="card">
+        <div class="card-title">📊 Summary — ทุกยุค</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>ยุค</th><th>ระบบ</th><th>หลักการทำงาน</th><th>ข้อดี</th><th>ข้อเสีย</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1900–1920</td><td class="mono">Pilotage</td><td>บินเทียบแผนที่ ดูแม่น้ำ ทางรถไฟ</td><td>ไม่ต้องการอุปกรณ์</td><td>ต้องมองเห็น</td></tr>
+              <tr><td class="mono">Dead Reckoning</td><td>เข็มทิศ + นาฬิกา + ความเร็ว</td><td>บินกลางคืนได้</td><td>Error สะสม</td></tr>
+              <tr><td style="color:var(--text3)">1920–1940</td><td class="mono">NDB / ADF</td><td>เข็ม ADF ชี้สถานี (LF/MF)</td><td>ง่าย ราคาถูก</td><td>CB รบกวน Night Effect</td></tr>
+              <tr><td rowspan="3" style="vertical-align:top;color:var(--text3)">1950–1990</td><td class="mono">VOR</td><td>Radial 360° (VHF) บอกทิศ</td><td>แม่นกว่า NDB</td><td>Line of Sight</td></tr>
+              <tr><td class="mono">DME</td><td>วัดระยะทางจาก Station</td><td>รู้ตำแหน่งชัดเจน</td><td>ต้องใช้คู่ VOR</td></tr>
+              <tr><td class="mono">ILS</td><td>LOC(ซ้าย-ขวา) + GS(สูง-ต่ำ)</td><td>ลงจอดทัศนวิสัยต่ำได้</td><td>ต้องมีอุปกรณ์สนามบิน</td></tr>
+              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1970–ปัจจุบัน</td><td class="mono">INS / IRS</td><td>Gyro + Accelerometer นำทางตัวเอง</td><td>อิสระจาก Ground Station</td><td>Drift นาน</td></tr>
+              <tr><td class="mono">FMS / RNAV</td><td>รวมข้อมูลทุก Navaid + Waypoints</td><td>บินลัดตรง A→B</td><td>ต้อง Database ถูกต้อง</td></tr>
+              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1990–ปัจจุบัน</td><td class="mono">GNSS / GPS</td><td>ดาวเทียม 4+ ดวง → 3D Position</td><td>แม่นมาก ครอบคลุมทั่วโลก</td><td>Jamming / Spoofing</td></tr>
+              <tr><td class="mono">PBN (RNAV/RNP)</td><td>กำหนด Performance ที่ต้องได้</td><td>ยืดหยุ่น ไม่ผูกกับอุปกรณ์</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="sec-grid">
+        <div class="card">
+          <div class="card-title">🌟 RNAV vs RNP</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+            <div style="background:var(--blue-bg);border:1px solid var(--blue);border-radius:7px;padding:10px">
+              <b style="color:var(--blue)">RNAV</b>
+              <div style="color:var(--text2);margin-top:5px;line-height:1.7">บินตาม Waypoints โดยตรง ไม่ต้อง VOR-to-VOR<br>ไม่มีระบบเตือนภัย นักบินต้องตรวจสอบเอง<br>เช่น RNAV 1 = ±1 NM</div>
+            </div>
+            <div style="background:var(--purple-bg);border:1px solid var(--purple);border-radius:7px;padding:10px">
+              <b style="color:var(--purple)">RNP</b>
+              <div style="color:var(--text2);margin-top:5px;line-height:1.7">เหมือน RNAV + มี OPMA<br>(On-board Monitoring & Alerting)<br>ระบบเตือนอัตโนมัติ สามารถบินโค้งได้<br>เช่น RNP 0.3 = ±0.3 NM</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📡 ILS Components</div>
+          <div style="font-size:12px;line-height:2.1;color:var(--text2)">
+            <div><span style="color:var(--blue)">Localizer (LOC)</span> — แนว ซ้าย-ขวา ให้ตรงกึ่งกลาง Runway (110–111.95 MHz)</div>
+            <div><span style="color:var(--green)">Glide Slope (GS)</span> — แนว สูง-ต่ำ มุมร่อนปกติ 3° (329.15–335.00 MHz)</div>
+            <div><span style="color:var(--amber)">Outer Marker (OM)</span> — ห่าง ~7.2 km จาก Threshold เสียง 400 Hz ——</div>
+            <div><span style="color:var(--amber)">Middle Marker (MM)</span> — ห่าง ~1.1 km เสียง 1300 Hz -.-.-</div>
+            <div><span style="color:var(--red)">Inner Marker (IM)</span> — CAT II/III ใกล้ Threshold เสียง 3000 Hz ···</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PNR ===== -->
+    <div class="page" id="page-pnr">
+      <div class="page-hd">PNR & Contingency Fuel</div>
+      <div class="page-sub">คำนวณ Point of No Return และ Contingency Fuel Rule 3% / 5%</div>
+      <div class="sec-grid">
+        <div class="card">
+          <div class="card-title">⛽ PNR Calculator</div>
+          <div class="form-row"><label>Endurance (ชม.)</label><input class="inp inp-sm" type="number" id="pnr_e" value="10" step="0.5" oninput="calcPNR()"></div>
+          <div class="form-row"><label>GS Out (kts)</label><input class="inp inp-sm" type="number" id="pnr_out" value="500" oninput="calcPNR()"></div>
+          <div class="form-row"><label>GS Back (kts)</label><input class="inp inp-sm" type="number" id="pnr_back" value="400" oninput="calcPNR()"></div>
+          <div id="pnr-result" style="margin-top:10px"></div>
+          <div style="background:var(--bg3);border-radius:6px;padding:8px;font-size:11px;font-family:var(--mono);color:var(--text2);margin-top:8px;line-height:2">
+            Time = E × GS_Back ÷ (GS_Out + GS_Back)<br>
+            Distance = GS_Out × Time
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💰 Contingency Fuel</div>
+          <div class="form-row"><label>Trip Fuel (kg)</label><input class="inp inp-sm" type="number" id="cf_trip" value="80000" oninput="calcCF()"></div>
+          <div id="cf-result" style="margin-top:10px"></div>
+          <div class="warn-box" style="margin-top:10px">ERA Required: ต้องมีสนามบินสำรองระหว่างทาง (En-Route Alternate) ที่เหมาะสม อากาศดี เปิดให้บริการ จึงใช้ Rule 3% ได้</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.9;margin-top:6px">
+            <b style="color:var(--text)">5% Standard:</b> Trip Fuel × 0.05 — ใช้ได้ทุกกรณี<br>
+            <b style="color:var(--text)">3% with ERA:</b> Trip Fuel × 0.03 — ประหยัดน้ำมัน/รับสินค้าเพิ่ม
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- main -->
+</div><!-- layout -->
+
+<!-- ===== EDIT FLIGHT MODAL ===== -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="editModalTitle">แก้ไขเที่ยวบิน</span>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <div class="form-row"><label>Flight No.</label><input class="inp" id="e_no" placeholder="e.g. 801"></div>
+    <div class="form-row"><label>REG</label><input class="inp" id="e_reg" placeholder="e.g. KMA"></div>
+    <div class="form-row"><label>DEP Station</label><input class="inp" id="e_dep" placeholder="e.g. BKK"></div>
+    <div class="form-row"><label>STD (UTC)</label><input class="inp" id="e_std" placeholder="HH:MM"></div>
+    <div class="form-row"><label>ARR Station</label><input class="inp" id="e_arr" placeholder="e.g. SIN"></div>
+    <div class="form-row"><label>STA (UTC)</label><input class="inp" id="e_sta" placeholder="HH:MM"></div>
+    <div class="form-row"><label>Sector</label>
+      <select class="inp" id="e_sector"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+    </div>
+    <div class="form-row"><label>Crew Figure</label>
+      <select class="inp" id="e_crew_fig">
+        <option value="-">— (POS)</option>
+        <option value="2/0">2/0</option>
+        <option value="2/1">2/1</option>
+        <option value="2/2">2/2</option>
+        <option value="2/3">2/3</option>
+        <option value="3/0">3/0</option>
+        <option value="3/1">3/1</option>
+        <option value="3/2">3/2</option>
+        <option value="3/3">3/3</option>
+      </select>
+    </div>
+    <div class="form-row"><label>PIC</label><input class="inp" id="e_pic" placeholder="ชื่อ Captain"></div>
+    <div class="form-row"><label>F/O</label><input class="inp" id="e_fo" placeholder="ชื่อ First Officer"></div>
+    <div class="form-row"><label>FDP (UTC)</label><input class="inp" id="e_fdp" placeholder="e.g. 00:25z"></div>
+    <div class="form-row"><label>Max FDP</label><input class="inp" id="e_maxfdp" placeholder="e.g. MAX 11:00z"></div>
+    <div class="form-row"><label>RWY DEP Closed</label><input class="inp" id="e_rwy_dep" placeholder="e.g. 07L/07R 1500-2359 Local"></div>
+    <div class="form-row"><label>RWY ARR Closed</label><input class="inp" id="e_rwy_arr" placeholder="e.g. 01/19 1900-2330 Local"></div>
+    <div class="form-row"><label>MEL No.</label><input class="inp" id="e_mel" placeholder="MEL No. (ถ้ามี)"></div>
+    <div class="form-row"><label>Remark</label><input class="inp" id="e_remark" placeholder="หมายเหตุ"></div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="deleteFlightBtn" onclick="deleteFlight()">🗑 ลบเที่ยวบิน</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('editModal')">ยกเลิก</button>
+      <button class="btn btn-sm" onclick="saveFlightEdit()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+let flights = [
+  {no:'525',reg:'KMD',dep:'HAN',arr:'HKG',std:'15:30',sta:'17:30',sector:1,crew_fig:'2/2',pic:'CHATNARO​NG',fo:'KASANU',fdp:'19:35z',maxfdp:'MAX 01:30z',rwy_dep:'07L/07R/25L/25R 1500-2359',rwy_arr:'',mel:'',remark:''},
+  {no:'526',reg:'KMD',dep:'HKG',arr:'BKK',std:'19:30',sta:'22:25',sector:1,crew_fig:'2/2',pic:'CHATNARO​NG',fo:'KASANU',fdp:'22:35z',maxfdp:'',rwy_dep:'07L/07R/25L/25R',rwy_arr:'01/19/02L/20R 1900-2330',mel:'',remark:''},
+  {no:'525',reg:'KMD',dep:'BKK',arr:'HAN',std:'23:25',sta:'01:15',sector:1,crew_fig:'2/2',pic:'PICHET',fo:'MATHIN',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'-',mel:'',remark:''},
+  {no:'713',reg:'KMA',dep:'BKK',arr:'DAC',std:'00:00',sta:'02:35',sector:1,crew_fig:'2/1',pic:'KOOLAPONG',fo:'PONGPATH',fdp:'05:45z',maxfdp:'MAX 12:00z',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'714',reg:'KMA',dep:'DAC',arr:'BKK',std:'03:35',sta:'06:15',sector:1,crew_fig:'2/1',pic:'KOOLAPONG',fo:'PONGPATH',fdp:'09:20z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'801',reg:'-',dep:'CGK',arr:'SIN',std:'16:55',sta:'18:40',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'21:40z',maxfdp:'MAX 02:55z',rwy_dep:'07R/25L 1600-1659',rwy_arr:'-',mel:'',remark:'Positioning'},
+  {no:'801',reg:'KMA',dep:'SIN',arr:'BKK',std:'19:40',sta:'22:10',sector:1,crew_fig:'3/1',pic:'WUTTHICHOCK/BUNCHA',fo:'PURIPAK',fdp:'00:25z',maxfdp:'',rwy_dep:'-',rwy_arr:'01/19/02L/20R 1200-1630z',mel:'',remark:''},
+  {no:'802',reg:'KME',dep:'BKK',arr:'KTI',std:'00:00',sta:'01:20',sector:1,crew_fig:'3/2',pic:'SONGPOL',fo:'THITIPONG/PARAMA',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'803',reg:'KMA',dep:'KTI',arr:'BKK',std:'12:20',sta:'13:40',sector:1,crew_fig:'3/3',pic:'CHATCHAI',fo:'NAVAPORN',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'-',mel:'',remark:''},
+  {no:'804',reg:'KMA',dep:'BKK',arr:'SIN',std:'16:00',sta:'18:30',sector:1,crew_fig:'3/1',pic:'WUTTHICHOCK/BUNCHA',fo:'PURIPAK',fdp:'22:45z',maxfdp:'MAX 04:00z',rwy_dep:'01/19/02L/20R 1900-2330',rwy_arr:'02L/20R 1730-2130',mel:'',remark:''},
+  {no:'804',reg:'-',dep:'SIN',arr:'CGK',std:'22:00',sta:'23:45',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'02:15z',maxfdp:'',rwy_dep:'-',rwy_arr:'07L/25R/06/24 1700-2229',mel:'',remark:'Positioning'},
+  {no:'252',reg:'-',dep:'KUL',arr:'SZX',std:'13:50',sta:'18:00',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'17:15z',maxfdp:'MAX 01:30z',rwy_dep:'',rwy_arr:'',mel:'',remark:'Positioning'},
+  {no:'252',reg:'-',dep:'SZX',arr:'CEI',std:'19:40',sta:'22:55',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'21:30z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'252',reg:'-',dep:'CEI',arr:'AUH',std:'23:50',sta:'06:20',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'15:15z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'261',reg:'-',dep:'AUH',arr:'CNX',std:'08:00',sta:'14:20',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'20:55z',maxfdp:'MAX 13:00z',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'261',reg:'-',dep:'CNX',arr:'SZX',std:'15:20',sta:'18:10',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'04:10z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'261',reg:'-',dep:'SZX',arr:'KUL',std:'19:50',sta:'23:50',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'09:15z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'262',reg:'-',dep:'KUL',arr:'SZX',std:'13:50',sta:'18:00',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'12:30z',maxfdp:'MAX 18:10z',rwy_dep:'',rwy_arr:'',mel:'',remark:'Positioning'},
+  {no:'262',reg:'KSA',dep:'SZX',arr:'CNX',std:'19:40',sta:'22:35',sector:1,crew_fig:'2/2',pic:'SANONG',fo:'PHURIWAT',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'262',reg:'KSA',dep:'CNX',arr:'AUH',std:'23:40',sta:'06:20',sector:1,crew_fig:'2/2',pic:'SANONG',fo:'PHURIWAT',fdp:'16:20z',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+  {no:'251',reg:'-',dep:'CEI',arr:'SZX',std:'15:50',sta:'18:35',sector:1,crew_fig:'-',pic:'-',fo:'-',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:'Positioning'},
+  {no:'251',reg:'KSB',dep:'SZX',arr:'KUL',std:'19:50',sta:'23:50',sector:1,crew_fig:'2/2',pic:'CHANON',fo:'PATCHANON',fdp:'',maxfdp:'',rwy_dep:'',rwy_arr:'',mel:'',remark:''},
+];
+
+let editIdx = -1;
+const CHECKS = ['OFP','MEL','MET','NOTAM','FUEL','LS','ATC FPL'];
+// checkState[i][checkName] = bool
+let checkState = {};
+
+// FAK/MEL editable data
+let fakData = {
+  'KMA': {fak:'L1=65 / L3=200', mel1:'', mel2:'', mel3:''},
+  'KMB': {fak:'L1=65 / L3=200', mel1:'', mel2:'', mel3:''},
+  'KMD': {fak:'L1=35 / L2=30 / L4=200', mel1:'', mel2:'', mel3:''},
+  'KME': {fak:'L1=35 / L2=30 / L4=200', mel1:'', mel2:'', mel3:''},
+  'KSA': {fak:'510', mel1:'25-20-01', mel2:'', mel3:''},
+  'KSB': {fak:'509', mel1:'', mel2:'', mel3:''},
+};
+
+const normalChecks = {
+  morning: ['CSV FILE','OTP/WEEKLY','OTP MONDAY','TECH LOG/FAK','ACFT STATUS','CATERING'],
+  night:   ['ACFT ROTATION','OPT'],
+};
+const abnormalChecks = ['DHL AP','DHL GHA','SF AP','SF GHA','CREW MOV.','SLOT','TRANSPORTATION','PERMIT','ACFT ROTATION','BKK APRON','LSG','HOTEL'];
+
+// Planning table data
+const planningData = [
+  // ──────────────────────────────────────────────────────────────────
+  // Plan B — Two Separate Runways & Facilities (คำนวณ "Higher of Two")
+  // VTBS — Suvarnabhumi, Thailand  (RWY 01L/19R และ 01R/19L เท่านั้น)
+  {ap:'Suvarnabhumi', icao:'VTBS', rwy:'RWY 01L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 19R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 01R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 19L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // WSSS — Singapore Changi
+  {ap:'Singapore',    icao:'WSSS', rwy:'RWY 02',  type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 20',  type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // WMKK — Kuala Lumpur KLIA, Malaysia
+  {ap:'Kuala Lumpur', icao:'WMKK', rwy:'RWY 14',  type:'ILS', dh:246, vis:550,  planADh:646, planAVis:2050, planBDh:446, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 15',  type:'ILS', dh:205, vis:550,  planADh:605, planAVis:2050, planBDh:405, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 32',  type:'ILS', dh:240, vis:550,  planADh:640, planAVis:2050, planBDh:440, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 33',  type:'ILS', dh:396, vis:1100,  planADh:796, planAVis:2600, planBDh:596, planBVis:1900, plan:'B'},
+  // VHHH — Hong Kong International
+  {ap:'Hong Kong',    icao:'VHHH', rwy:'RWY 07L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 07R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 25L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 25R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // ZGSZ — Shenzhen Bao'an, China
+  {ap:'Shenzhen',     icao:'ZGSZ', rwy:'RWY 15',  type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 33',  type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // ZGGG — Guangzhou Baiyun, China
+  {ap:'Guangzhou',    icao:'ZGGG', rwy:'RWY 02L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 02R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 20L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 20R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // OMAA — Abu Dhabi, UAE
+  {ap:'Abu Dhabi',    icao:'OMAA', rwy:'RWY 13L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 13R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 31L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 31R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // OMDW — Al Maktoum/Dubai World Central, UAE
+  {ap:'Al Maktoum',   icao:'OMDW', rwy:'RWY 12',  type:'ILS', dh:218, vis:550,  planADh:618, planAVis:2050, planBDh:418, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 30',  type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'B'},
+  // VOBL — Bangalore/Kempegowda, India
+  {ap:'Bangalore',    icao:'VOBL', rwy:'RWY 09',  type:'ILS', dh:202, vis:550,  planADh:602, planAVis:2050, planBDh:402, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 27',  type:'ILS', dh:209, vis:550,  planADh:609, planAVis:2050, planBDh:409, planBVis:1350, plan:'B'},
+  // VECC — Kolkata/Netaji Subhash Chandra Bose, India
+  {ap:'Kolkata',      icao:'VECC', rwy:'RWY 01',  type:'ILS', dh:212, vis:550,  planADh:612, planAVis:2050, planBDh:412, planBVis:1350, plan:'B'},
+  {ap:'',             icao:'',     rwy:'RWY 19',  type:'ILS', dh:229, vis:550,  planADh:629, planAVis:2050, planBDh:429, planBVis:1350, plan:'B'},
+
+  // ──────────────────────────────────────────────────────────────────
+  // Plan A — Single Runway / Single Facility (ILS หรือ VOR)
+  // VOCI — Cochin/Kochi, India
+  {ap:'Cochin',       icao:'VOCI', rwy:'RWY 09',  type:'ILS', dh:222, vis:550,  planADh:622, planAVis:2050, planBDh:422, planBVis:1350, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 27',  type:'ILS', dh:290, vis:650,  planADh:690, planAVis:2150, planBDh:490, planBVis:1450, plan:'A'},
+  // VTBD — Don Mueang, Thailand
+  {ap:'Don Mueang',   icao:'VTBD', rwy:'RWY 03',  type:'ILS', dh:213, vis:800,  planADh:613, planAVis:2300, planBDh:413, planBVis:1600, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 21',  type:'ILS', dh:213, vis:550,  planADh:613, planAVis:2050, planBDh:413, planBVis:1350, plan:'A'},
+  // VTBU — U-Tapao, Thailand
+  {ap:'U-Tapao',      icao:'VTBU', rwy:'RWY 18',  type:'ILS', dh:241, vis:1200,  planADh:641, planAVis:2700, planBDh:441, planBVis:2000, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 36',  type:'RNP', dh:456, vis:2400,  planADh:856, planAVis:3900, planBDh:656, planBVis:3200, plan:'A'},
+  // WIDD — Batam/Hang Nadim, Indonesia
+  {ap:'Batam',        icao:'WIDD', rwy:'RWY 04',  type:'ILS', dh:267, vis:800,  planADh:667, planAVis:2300, planBDh:467, planBVis:1600, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 22',  type:'RNP', dh:503, vis:2500,  planADh:903, planAVis:4000, planBDh:703, planBVis:3300, plan:'A'},
+  // WIPP — Penang, Malaysia
+  {ap:'Penang',       icao:'WIPP', rwy:'RWY 11',  type:'ILS', dh:311, vis:800,  planADh:711, planAVis:2300, planBDh:511, planBVis:1600, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 29',  type:'ILS', dh:241, vis:800,  planADh:641, planAVis:2300, planBDh:441, planBVis:1600, plan:'A'},
+  // VGEG — Chittagong/Shah Amanat, Bangladesh
+  {ap:'Chittagong',   icao:'VGEG', rwy:'RWY 05',  type:'RNP', dh:327, vis:1500,  planADh:727, planAVis:3000, planBDh:527, planBVis:2300, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 23',  type:'ILS', dh:320, vis:1000,  planADh:720, planAVis:2500, planBDh:520, planBVis:1800, plan:'A'},
+  // OMAL — Al Ain, UAE
+  {ap:'Al Ain',       icao:'OMAL', rwy:'RWY 01',  type:'ILS', dh:206, vis:550,  planADh:606, planAVis:2050, planBDh:406, planBVis:1350, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 19',  type:'VOR', dh:482, vis:1800,  planADh:882, planAVis:3300, planBDh:682, planBVis:2600, plan:'A'},
+  // VVNB — Hanoi Noi Bai, Vietnam
+  {ap:'Hanoi',        icao:'VVNB', rwy:'RWY 11L', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'A'},
+  {ap:'',             icao:'',     rwy:'RWY 11R', type:'ILS', dh:200, vis:550,  planADh:600, planAVis:2050, planBDh:400, planBVis:1350, plan:'A'},
+];
+
+// ── Aircraft Data — อัปเดตตามข้อมูลจริง ──
+// base_oew  = DOW ของ AC ลำนั้น เมื่อ crew = 0 (ค่าที่ user กำหนด)
+// crew_wt   = น้ำหนักลูกเรือ 1 คน (รวมสัมภาระ)
+//   KMA/KMB : 220 lbs/คน = 99.79 kg/คน  (B747 ops ใช้หน่วย lbs)
+//   KMD/KME/KSA/KSB : 100 kg/คน
+// DOW = base_oew + crew × crew_wt_kg  → อัปเดตอัตโนมัติเมื่อเปลี่ยน Crew Onboard
+
+const LBS_TO_KG = 0.453592; // 1 lb = 0.453592 kg
+const KG_TO_LBS = 2.204623; // 1 kg = 2.204623 lbs
+
+const acData = {
+  // KMA: base_oew=71,939 | crew_wt=220 lbs (99.79 kg) | def_crew=3 → DOW=72,238
+  KMA: {
+    label:'KMA — B747-400BCF', base_oew:71939, def_crew:3, unit:'lbs',
+    crew_wt_kg: 220,
+    crew_wt_display: '220 lbs',
+    ramp:24600, trip:13200, taxi:441,
+    mszfw:117000, mstow:150000, mslw:124000,
+    pltow:150000, pllw:124000,
+    note:'DOW base = 71,939 kg | Crew = 220 lbs/คน | MSZFW=117,000 | MSTOW=150,000 | MSLW=124,000 | Taxi=441 kg',
+  },
+  // KMB: base_oew=72,510 | crew_wt=220 lbs (99.79 kg) | def_crew=4 → DOW=72,909
+  KMB: {
+    label:'KMB — B747-400BCF', base_oew:72510, def_crew:4, unit:'lbs',
+    crew_wt_kg: 220,
+    crew_wt_display: '220 lbs',
+    ramp:21000, trip:6000, taxi:441,
+    mszfw:117000, mstow:150000, mslw:124000,
+    pltow:150000, pllw:124000,
+    note:'DOW base = 72,510 kg | Crew = 220 lbs/คน | MSZFW=117,000 | MSTOW=150,000 | MSLW=124,000 | Taxi=441 kg',
+  },
+  // KMD: base_oew=39,327 | crew_wt=100 kg | def_crew=4 → DOW=39,727
+  KMD: {
+    label:'KMD — B737-800F', base_oew:39327, def_crew:4, unit:'kg',
+    crew_wt_kg: 100,
+    crew_wt_display: '100 kg',
+    ramp:10400, trip:4500, taxi:200,
+    mszfw:61688, mstow:71894, mslw:65317,
+    pltow:71894, pllw:65317,
+    note:'DOW base = 39,327 kg | Crew = 100 kg/คน | MSZFW=61,688 | MSTOW=71,894 | MSLW=65,317 | Taxi=200 kg',
+  },
+  // KME: base_oew=38,885 | crew_wt=100 kg | def_crew=3 → DOW=39,185
+  KME: {
+    label:'KME — B737-800F', base_oew:38885, def_crew:3, unit:'kg',
+    crew_wt_kg: 100,
+    crew_wt_display: '100 kg',
+    ramp:11800, trip:7500, taxi:200,
+    mszfw:61688, mstow:77564, mslw:65317,
+    pltow:77564, pllw:65317,
+    note:'DOW base = 38,885 kg | Crew = 100 kg/คน | MSZFW=61,688 | MSTOW=77,564 | MSLW=65,317 | Taxi=200 kg',
+  },
+  // KSA: base_oew=83,183 | crew_wt=100 kg | def_crew=3 → DOW=83,483
+  KSA: {
+    label:'KSA — B767-300F', base_oew:83183, def_crew:3, unit:'kg',
+    crew_wt_kg: 100,
+    crew_wt_display: '100 kg',
+    ramp:21000, trip:12000, taxi:700,
+    mszfw:140160, mstow:184221, mslw:147871,
+    pltow:184221, pllw:147871,
+    note:'DOW base = 83,183 kg | Crew = 100 kg/คน | MSZFW=140,160 | MSTOW=184,221 | MSLW=147,871 | Taxi=700 kg',
+  },
+  // KSB: base_oew=83,786 | crew_wt=100 kg | def_crew=3 → DOW=84,086
+  KSB: {
+    label:'KSB — B767-300F', base_oew:83786, def_crew:3, unit:'kg',
+    crew_wt_kg: 100,
+    crew_wt_display: '100 kg',
+    ramp:27000, trip:13200, taxi:700,
+    mszfw:140160, mstow:184221, mslw:147871,
+    pltow:184221, pllw:147871,
+    note:'DOW base = 83,786 kg | Crew = 100 kg/คน | MSZFW=140,160 | MSTOW=184,221 | MSLW=147,871 | Taxi=700 kg',
+  },
+};
+
+// ===================== CLOCK =====================
+function updateClock(){
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `UTC ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())}`;
+}
+setInterval(updateClock,1000); updateClock();
+
+// ===================== NAVIGATION =====================
+function nav(name, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ===================== MODAL =====================
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ===================== DAILY FLIGHTS =====================
+function renderFlights(){
+  const grid = document.getElementById('flight-grid');
+  grid.innerHTML = '';
+  flights.forEach((f,i)=>{
+    if(!checkState[i]) checkState[i]={};
+    const done = CHECKS.filter(c=>checkState[i][c]).length;
+    const pct = Math.round(done/CHECKS.length*100);
+    const isPos = f.reg==='-' || !f.reg || f.pic==='-' || !f.pic;
+    const hasCrew = f.pic && f.pic!=='-' && f.pic.trim()!=='';
+    const regCol = isPos
+      ? `<span style="background:rgba(210,153,34,0.15);border:1.5px solid var(--amber);border-radius:7px;padding:3px 10px;font-size:13px;font-family:var(--mono);color:var(--amber);font-weight:700;letter-spacing:1px">POS</span>`
+      : `<span style="background:rgba(88,166,255,0.15);border:2px solid var(--blue);border-radius:7px;padding:3px 12px;font-size:15px;font-family:var(--mono);color:var(--blue);font-weight:800;letter-spacing:1.5px">${f.reg}</span>`;
+
+    // MEL lookup: match flight REG to fakData key
+    // fakData keys: 'KMA/KMB', 'KMD', 'KME', 'KSA', 'KSB'
+    function getMelForReg(reg) {
+      if(!reg || reg==='-') return null;
+      return fakData[reg] || null;
+    }
+    const fakEntry = getMelForReg(f.reg);
+    const melFromFAK = fakEntry
+      ? [fakEntry.mel1, fakEntry.mel2, fakEntry.mel3].filter(Boolean).join(' | ')
+      : '';
+    const melFromFlight = f.mel ? f.mel : '';
+    const allMel = [melFromFAK, melFromFlight].filter(Boolean).join(' | ');
+
+    const div = document.createElement('div');
+    div.className = 'fc' + (hasCrew ? ' fc-crew' : '');
+    div.innerHTML = `
+      <div class="fc-head" onclick="openEdit(${i})">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <span class="fc-no">8K${f.no}</span>
+          ${regCol}
+          ${hasCrew ? `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.3);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--blue);white-space:nowrap">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block"></span>
+            ${f.pic}
+          </span>` : ''}
+          <span class="fc-route" style="color:var(--text);font-weight:600">${f.dep} → ${f.arr}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span class="fc-times">${f.std}–${f.sta}</span>
+          <span style="color:var(--text3);font-size:12px">✏</span>
+        </div>
+      </div>
+      ${allMel ? `<div class="fc-mel-banner">
+        <span style="color:var(--amber);font-weight:600;font-size:13px">⚠ MEL</span>
+        <span style="font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:600">${allMel}</span>
+        <span style="color:var(--text3);font-size:11px">${f.reg!=='-'?'REG: '+f.reg:''}</span>
+      </div>` : ''}
+      <div class="fc-body">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px;margin-bottom:8px;align-items:center">
+          ${f.fdp?`<span style="color:var(--text2)">FDP:</span> <span class="mono" style="color:var(--amber);font-size:12px">${f.fdp}</span>`:''}
+          ${f.maxfdp?`<span style="color:var(--text3);font-size:11px">${f.maxfdp}</span>`:''}
+          ${f.crew_fig&&f.crew_fig!=='-'?`<span style="color:var(--text3)">Crew: <b style="color:var(--text)">${f.crew_fig}</b></span>`:''}
+          ${hasCrew&&f.fo&&f.fo!=='-'?`<span style="color:var(--text3)">F/O: <b style="color:var(--text)">${f.fo}</b></span>`:''}
+        </div>
+        ${f.rwy_dep&&f.rwy_dep!=='-'?`<div style="font-size:11px;margin-bottom:3px"><span style="color:var(--text3)">DEP RWY Closed:</span> <span class="rwy-badge">${f.rwy_dep}</span></div>`:''}
+        ${f.rwy_arr&&f.rwy_arr!=='-'?`<div style="font-size:11px;margin-bottom:3px"><span style="color:var(--text3)">ARR RWY Closed:</span> <span class="rwy-badge">${f.rwy_arr}</span></div>`:''}
+        ${f.remark?`<div style="font-size:11px;color:var(--purple);margin-bottom:4px">${f.remark}</div>`:''}
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px">
+          <span>Check List</span><span style="color:${done===CHECKS.length?'var(--green)':'var(--text3)'}">${done}/${CHECKS.length}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${done===CHECKS.length?'var(--green)':'var(--blue)'}"></div></div>
+        <div class="cl-grid" id="cl-${i}"></div>
+      </div>`;
+    grid.appendChild(div);
+    const clDiv = document.getElementById('cl-'+i);
+    CHECKS.forEach(c=>{
+      const item = document.createElement('div');
+      item.className = 'cl-item' + (checkState[i][c]?' done':'');
+      item.onclick = e=>{ e.stopPropagation(); checkState[i][c]=!checkState[i][c]; renderFlights(); saveState(); };
+      item.innerHTML = `<div class="cl-tick">${checkState[i][c]?'✓':''}</div><div class="cl-lbl">${c}</div>`;
+      clDiv.appendChild(item);
+    });
+  });
+}
+
+function openAddFlight(){
+  editIdx = -1;
+  ['e_no','e_reg','e_dep','e_std','e_arr','e_sta','e_crew_fig','e_pic','e_fo','e_fdp','e_maxfdp','e_rwy_dep','e_rwy_arr','e_mel','e_remark']
+    .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('e_sector').value='1';
+  document.getElementById('editModalTitle').textContent='เพิ่มเที่ยวบินใหม่';
+  document.getElementById('deleteFlightBtn').style.display='none';
+  document.getElementById('editModal').classList.add('open');
+}
+function openEdit(i){
+  editIdx = i;
+  const f = flights[i];
+  document.getElementById('e_no').value=f.no;
+  document.getElementById('e_reg').value=f.reg;
+  document.getElementById('e_dep').value=f.dep;
+  document.getElementById('e_std').value=f.std;
+  document.getElementById('e_arr').value=f.arr;
+  document.getElementById('e_sta').value=f.sta;
+  document.getElementById('e_sector').value=f.sector||'1';
+  document.getElementById('e_crew_fig').value=f.crew_fig||'';
+  document.getElementById('e_pic').value=f.pic||'';
+  document.getElementById('e_fo').value=f.fo||'';
+  document.getElementById('e_fdp').value=f.fdp||'';
+  document.getElementById('e_maxfdp').value=f.maxfdp||'';
+  document.getElementById('e_rwy_dep').value=f.rwy_dep||'';
+  document.getElementById('e_rwy_arr').value=f.rwy_arr||'';
+  document.getElementById('e_mel').value=f.mel||'';
+  document.getElementById('e_remark').value=f.remark||'';
+  document.getElementById('editModalTitle').textContent=`แก้ไข 8K${f.no} ${f.dep}→${f.arr}`;
+  document.getElementById('deleteFlightBtn').style.display='inline-block';
+  document.getElementById('editModal').classList.add('open');
+}
+function saveFlightEdit(){
+  const f = {
+    no: document.getElementById('e_no').value.trim(),
+    reg: document.getElementById('e_reg').value.trim()||'-',
+    dep: document.getElementById('e_dep').value.trim().toUpperCase(),
+    std: document.getElementById('e_std').value.trim(),
+    arr: document.getElementById('e_arr').value.trim().toUpperCase(),
+    sta: document.getElementById('e_sta').value.trim(),
+    sector: document.getElementById('e_sector').value,
+    crew_fig: document.getElementById('e_crew_fig').value.trim(),
+    pic: document.getElementById('e_pic').value.trim(),
+    fo: document.getElementById('e_fo').value.trim(),
+    fdp: document.getElementById('e_fdp').value.trim(),
+    maxfdp: document.getElementById('e_maxfdp').value.trim(),
+    rwy_dep: document.getElementById('e_rwy_dep').value.trim(),
+    rwy_arr: document.getElementById('e_rwy_arr').value.trim(),
+    mel: document.getElementById('e_mel').value.trim(),
+    remark: document.getElementById('e_remark').value.trim(),
+  };
+  if(!f.no||!f.dep||!f.arr){ alert('กรุณากรอก Flight No., DEP, ARR'); return; }
+  if(editIdx===-1){ flights.push(f); checkState[flights.length-1]={}; }
+  else { flights[editIdx]=f; }
+  closeModal('editModal');
+  renderFlights();
+  saveState();
+}
+function deleteFlight(){
+  if(!confirm(`ลบเที่ยวบิน 8K${flights[editIdx].no} ${flights[editIdx].dep}→${flights[editIdx].arr}?`)) return;
+  flights.splice(editIdx,1);
+  delete checkState[editIdx];
+  closeModal('editModal');
+  renderFlights();
+  saveState();
+}
+
+// ===================== FAK / MEL =====================
+function renderFAK(){
+  const grid = document.getElementById('fak-grid');
+  grid.innerHTML='';
+  Object.keys(fakData).forEach(reg=>{
+    const d=fakData[reg];
+    const hasMel=[d.mel1,d.mel2,d.mel3].some(m=>m&&m.trim());
+    const card=document.createElement('div');
+    card.className='fak-card';
+    card.style.cssText=hasMel?'border-color:var(--amber);background:rgba(210,153,34,0.06)':''; card.setAttribute('data-fak-card', reg);
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="fak-reg" style="font-size:18px;letter-spacing:1.5px">${reg}</div>
+        ${hasMel?`<span data-fak-badge="${reg}" style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`:`<span data-fak-badge="${reg}" style="display:none;background:var(--amber-bg);border:1px solid var(--amber);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--amber);font-weight:600">⚠ MEL Active</span>`}
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:5px">📦 FAK Limit</div>
+        <div style="background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;letter-spacing:0.5px">${d.fak}</span>
+          <button onclick="editFAKLimit('${reg}')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:0 2px" title="แก้ไข">✏</button>
+        </div>
+      </div>
+      <div style="margin-top:8px;margin-bottom:4px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">MEL No. (สูงสุด 3 รายการ)</div>
+      ${['mel1','mel2','mel3'].map((k,n)=>`
+      <div class="fak-row" style="margin-bottom:4px">
+        <span style="color:var(--text3);font-size:11px;width:40px">No.${n+1}</span>
+        <input class="mel-inp" style="flex:1;width:100%;font-size:13px;padding:6px 10px;color:${d[k]?'var(--amber)':'var(--text)'}"
+          value="${d[k]||''}" placeholder="MEL-XXX-YY"
+          oninput="fakData['${reg}'].${k}=this.value; this.style.color=this.value?'var(--amber)':'var(--text)'; saveState(); updateFAKCardHeader('${reg}');">
+      </div>`).join('')}`;
+    grid.appendChild(card);
+  });
+
+  // Normal checks
+  ['morning','night'].forEach(shift=>{
+    const el=document.getElementById('cl-'+shift);
+    el.innerHTML='';
+    normalChecks[shift].forEach(c=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px';
+      row.innerHTML=`<span style="color:var(--text2)">${c}</span><span class="tag tag-green">✓ 1</span>`;
+      el.appendChild(row);
+    });
+  });
+
+  const ab=document.getElementById('cl-abnormal');
+  ab.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px">';
+  abnormalChecks.forEach(c=>{
+    ab.innerHTML+=`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--text2)">${c}</div>`;
+  });
+  ab.innerHTML+='</div>';
+}
+
+
+
+function editFAKLimit(reg) {
+  var cur = fakData[reg] ? fakData[reg].fak : '';
+  var val = prompt('แก้ไข FAK Limit สำหรับ ' + reg + ':', cur);
+  if(val === null) return;
+  fakData[reg].fak = val.trim();
+  saveState();
+  renderFAK();
+}
+
+function renderFAK_MELbadge(){
+  // Lightweight: update only badge elements, no DOM re-render
+  Object.keys(fakData).forEach(function(reg){ updateFAKCardHeader(reg); });
+}
+
+function updateFAKCardHeader(reg) {
+  // Find badge element for this reg and update without re-rendering
+  var d = fakData[reg];
+  var hasMel = [d.mel1, d.mel2, d.mel3].some(function(m){ return m && m.trim(); });
+  var badges = document.querySelectorAll('[data-fak-badge="' + reg + '"]');
+  badges.forEach(function(el){
+    el.style.display = hasMel ? 'inline-block' : 'none';
+  });
+  var cards = document.querySelectorAll('[data-fak-card="' + reg + '"]');
+  cards.forEach(function(el){
+    el.style.borderColor = hasMel ? 'var(--amber)' : 'var(--border)';
+    el.style.background = hasMel ? 'rgba(210,153,34,0.06)' : '';
+  });
+}
+
+// ===================== PAYLOAD =====================
+var currentAC = null;
+
+function updateUnitLabels(unit) {
+  var u = unit === 'lbs' ? 'lbs' : 'kg';
+  var labels = {
+    lbl_dow:   'DOW (' + u + ')',
+    lbl_ramp:  'Ramp Fuel (' + u + ')',
+    lbl_trip:  'Trip Fuel (' + u + ')',
+    lbl_taxi:  'Taxi Fuel (' + u + ')',
+    lbl_mszfw: 'MSZFW (' + u + ')',
+    lbl_mstow: 'MSTOW (' + u + ')',
+    lbl_mslw:  'MSLW (' + u + ')',
+    lbl_pltow: 'PLTOW (' + u + ')',
+    lbl_pllw:  'PLLW (' + u + ')',
+  };
+  Object.keys(labels).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = labels[id];
+  });
+}
+
+function fillAC() {
+  var sel = document.getElementById('ac_sel').value;
+  var d = acData[sel];
+  if (!d) return;
+  currentAC = sel;
+  var crew = d.def_crew;
+  var dow = Math.round(d.base_oew + crew * d.crew_wt_kg);
+  document.getElementById('p_crew').value = crew;
+  document.getElementById('p_dow').value = dow;
+  document.getElementById('p_ramp').value = d.ramp;
+  document.getElementById('p_trip').value = d.trip;
+  document.getElementById('p_taxi').value = d.taxi;
+  document.getElementById('p_mszfw').value = d.mszfw;
+  document.getElementById('p_mstow').value = d.mstow;
+  document.getElementById('p_mslw').value = d.mslw;
+  document.getElementById('p_pltow').value = d.pltow;
+  document.getElementById('p_pllw').value = d.pllw;
+  updateUnitLabels(d.unit);
+  document.getElementById('ac-info').innerHTML =
+    '<b style="color:var(--blue)">' + d.label + '</b><br>' + d.note + '<br>' +
+    '<span style="color:var(--amber)">Base OEW (no crew) = ' +
+    (d.unit === 'lbs'
+      ? d.base_oew.toLocaleString() + ' ' + d.unit + ' (' + Math.round(d.base_oew * LBS_TO_KG).toLocaleString() + ' kg)'
+      : d.base_oew.toLocaleString() + ' kg') +
+    ' &nbsp;|&nbsp; Crew weight = ' + d.crew_wt_display + '/คน' + (d.unit === 'lbs' ? ' (= ' + d.crew_wt_kg + ' kg)' : '') + '</span>';
+  calcPayload();
+}
+
+function onCrewChange() {
+  if (!currentAC) return;
+  var d = acData[currentAC];
+  var crew = parseInt(document.getElementById('p_crew').value) || 0;
+  document.getElementById('p_dow').value = Math.round(d.base_oew + crew * d.crew_wt_kg);
+  calcPayload();
+}
+
+function calcPayload() {
+  try {
+    var d   = currentAC ? acData[currentAC] : null;
+    var unit = d ? d.unit : 'kg';
+    var toKg = unit === 'lbs' ? LBS_TO_KG : 1;
+    var toLbs = unit === 'lbs' ? 1 : 1; // display in native unit
+
+    var dow   = +document.getElementById('p_dow').value;
+    var ramp  = +document.getElementById('p_ramp').value;
+    var trip  = +document.getElementById('p_trip').value;
+    var taxi  = +document.getElementById('p_taxi').value;
+    var mszfw = +document.getElementById('p_mszfw').value;
+    var mstow = +document.getElementById('p_mstow').value;
+    var mslw  = +document.getElementById('p_mslw').value;
+    var pltow = +document.getElementById('p_pltow').value;
+    var pllw  = +document.getElementById('p_pllw').value;
+
+    // All values already in native unit (lbs or kg)
+    var tof  = ramp - taxi;
+    var ldf  = tof - trip;
+    var alw  = Math.min(mslw, pllw);
+    var atw_lw   = alw + trip;
+    var atw_zfw  = mszfw + tof;
+    var atw_str  = Math.min(mstow, pltow);
+    var atw  = Math.min(atw_lw, atw_zfw, atw_str);
+    var azfw = atw - tof;
+    var mtl  = azfw - dow;
+    var ok   = mtl >= 0;
+
+    var u = unit; // display unit
+    var u2 = unit === 'lbs' ? 'kg' : 'lbs'; // secondary unit
+    var conv = unit === 'lbs' ? LBS_TO_KG : KG_TO_LBS;
+    var prefix = unit === 'lbs' ? '' : '';
+
+    // Format with secondary unit
+    function fmt(val) {
+      var sec = Math.round(val * conv);
+      return val.toLocaleString() + ' ' + u + ' <span style="color:var(--text3);font-size:10px">(' + sec.toLocaleString() + ' ' + u2 + ')</span>';
+    }
+    function fmtPlain(val) { return Math.round(val).toLocaleString() + ' ' + u; }
+
+    // ATW paths
+    var paths = [
+      ['Landing (ALW+Trip)', atw_lw],
+      ['ZFW (MSZFW+TOF)', atw_zfw],
+      ['Struct/Perf (MSTOW/PLTOW)', atw_str],
+    ];
+    var bind_atw = (paths.find(function(p){ return p[1] === atw; }) || ['—'])[0];
+
+    var pathHTML = '<div style="margin-top:10px">' +
+      '<div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px">ATW Paths — ใช้ค่าน้อยสุด</div>' +
+      '<div class="limit-row">';
+    paths.forEach(function(p) {
+      var isB = p[0] === bind_atw;
+      pathHTML += '<div class="limit-cell' + (isB ? ' binding' : '') + '">' +
+        '<div class="lc-lbl">' + p[0] + '</div>' +
+        '<div class="lc-val">' + fmtPlain(p[1]) + '</div></div>';
+    });
+    pathHTML += '</div>' +
+      '<div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 5px">Intermediate Values</div>' +
+      '<div class="limit-row">' +
+        '<div class="limit-cell"><div class="lc-lbl">TOF (Ramp-Taxi)</div><div class="lc-val">' + fmtPlain(tof) + '</div></div>' +
+        '<div class="limit-cell"><div class="lc-lbl">LDF (TOF-Trip)</div><div class="lc-val">' + fmtPlain(ldf) + '</div></div>' +
+        '<div class="limit-cell"><div class="lc-lbl">ALW (min MSLW,PLLW)</div><div class="lc-val">' + fmtPlain(alw) + '</div></div>' +
+        '<div class="limit-cell binding"><div class="lc-lbl">ATW (binding)</div><div class="lc-val">' + fmtPlain(atw) + '</div></div>' +
+        '<div class="limit-cell binding"><div class="lc-lbl">AZFW (ATW-TOF)</div><div class="lc-val">' + fmtPlain(azfw) + '</div></div>' +
+      '</div></div>';
+
+    var resultStyle = ok ? '' : 'background:var(--red-bg);border-color:var(--red)';
+    var resultColor = ok ? 'var(--green)' : 'var(--red)';
+
+    document.getElementById('payload-result').innerHTML =
+      '<div class="stat-row">' +
+        '<div class="stat"><div class="stat-val mono">' + fmtPlain(tof) + '</div><div class="stat-lbl">TOF</div></div>' +
+        '<div class="stat"><div class="stat-val mono">' + fmtPlain(ldf) + '</div><div class="stat-lbl">LDF</div></div>' +
+        '<div class="stat"><div class="stat-val mono">' + fmtPlain(atw) + '</div><div class="stat-lbl">ATW</div></div>' +
+        '<div class="stat"><div class="stat-val mono">' + fmtPlain(azfw) + '</div><div class="stat-lbl">AZFW</div></div>' +
+      '</div>' +
+      '<div class="result-box" style="' + resultStyle + '">' +
+        '<div class="result-lbl" style="color:' + resultColor + '">MAX TRAFFIC LOAD (MTL)</div>' +
+        '<div class="result-val" style="color:' + resultColor + '; font-size:26px">' + Math.round(mtl).toLocaleString() + ' ' + u + '</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:2px">' +
+          'AZFW ' + fmtPlain(azfw) + ' - DOW ' + fmtPlain(dow) +
+          ' &nbsp;|&nbsp; Binding: <b style="color:var(--green)">' + bind_atw + '</b>' +
+        '</div>' +
+      '</div>' +
+      pathHTML;
+
+    // ── MATOW / Allowed Traffic Load / Underload (K-Mile Asia) ──
+    var actualTL = +(document.getElementById('p_actual') ? document.getElementById('p_actual').value : 0) || 0;
+    var lbl_act = document.getElementById('lbl_actual');
+    if(lbl_act) lbl_act.textContent = u;
+
+    // Allowed Traffic Load = AZFW - DOW
+    var allowedTL = azfw - dow;
+    var atl_ok = allowedTL >= 0;
+
+    // ZFW / TOW / LDW underload
+    var zfw_act = dow + actualTL;
+    var tow_act = zfw_act + tof;
+    var ldw_act = tow_act - trip;
+    var zfw_ul = mszfw - zfw_act;
+    var tow_ul = Math.min(mstow, pltow) - tow_act;
+    var ldw_ul = Math.min(mslw, pllw) - ldw_act;
+    var net_ul = Math.min(zfw_ul, tow_ul, ldw_ul);
+
+    function clr(v){ return v>=0?'var(--green)':'var(--red)'; }
+    function fmtUL(v){
+      return '<span style="font-family:var(--mono);font-size:13px;font-weight:700;color:'+clr(v)+'">' +
+        (v>=0?'+':'') + Math.round(v).toLocaleString() + ' ' + u + '</span>' +
+        ' <span style="font-size:10px;color:var(--text3)">(' + Math.round(Math.abs(v)*conv).toLocaleString() + ' ' + u2 + ')</span>';
+    }
+
+    var underloadEl = document.getElementById('underload-result');
+    if(underloadEl){
+      // Section 1: MATOW
+      var s1 = '<div style="margin-bottom:12px">' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">1. Allowed Weight for Take-off (MATOW)</div>' +
+        '<div class="limit-row">' +
+          '<div class="limit-cell' + (atw===atw_zfw?' binding':'') + '"><div class="lc-lbl">A: MSZFW+TOF</div><div class="lc-val">' + fmtPlain(atw_zfw) + '</div></div>' +
+          '<div class="limit-cell' + (atw===atw_str?' binding':'') + '"><div class="lc-lbl">B: MSTOW/PLTOW</div><div class="lc-val">' + fmtPlain(atw_str) + '</div></div>' +
+          '<div class="limit-cell' + (atw===atw_lw?' binding':'') + '"><div class="lc-lbl">C: MSLW+Trip</div><div class="lc-val">' + fmtPlain(atw_lw) + '</div></div>' +
+        '</div>' +
+        '<div style="margin-top:6px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-size:12px;color:var(--text2)">MATOW (ค่าต่ำสุด — Binding: ' + bind_atw + ')</span>' +
+          '<span style="font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text)">' + fmtPlain(atw) + '</span>' +
+        '</div></div>';
+
+      // Section 2: Allowed Traffic Load
+      var s2 = '<div style="margin-bottom:12px">' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">2. Allowed Traffic Load</div>' +
+        '<div style="background:' + (atl_ok?'var(--blue-bg)':'var(--red-bg)') + ';border:1px solid ' + (atl_ok?'var(--blue)':'var(--red)') + ';border-radius:8px;padding:10px 14px">' +
+          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px">= AZFW − DOW = ' + fmtPlain(azfw) + ' − ' + fmtPlain(dow) + '</div>' +
+          '<div style="font-size:28px;font-weight:700;font-family:var(--mono);color:' + (atl_ok?'var(--blue)':'var(--red)') + '">' +
+            (atl_ok?'':'−') + Math.abs(Math.round(allowedTL)).toLocaleString() + ' ' + u + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);margin-top:2px">= ' + Math.round(Math.abs(allowedTL)*conv).toLocaleString() + ' ' + u2 + '</div>' +
+        '</div></div>';
+
+      // Section 3: Underload
+      var s3 = actualTL > 0
+        ? '<div>' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text3);margin-bottom:6px">3. Underload — Actual: ' + actualTL.toLocaleString() + ' ' + u + '</div>' +
+          '<div class="limit-row">' +
+            '<div class="limit-cell' + (net_ul===zfw_ul?' binding':'') + '"><div class="lc-lbl">ZFW Underload</div><div class="lc-val">' + fmtUL(zfw_ul) + '</div></div>' +
+            '<div class="limit-cell' + (net_ul===tow_ul?' binding':'') + '"><div class="lc-lbl">TOW Underload</div><div class="lc-val">' + fmtUL(tow_ul) + '</div></div>' +
+            '<div class="limit-cell' + (net_ul===ldw_ul?' binding':'') + '"><div class="lc-lbl">LDW Underload</div><div class="lc-val">' + fmtUL(ldw_ul) + '</div></div>' +
+          '</div>' +
+          '<div style="margin-top:8px;background:' + (net_ul>=0?'var(--green-bg)':'var(--red-bg)') + ';border:1px solid ' + (net_ul>=0?'var(--green)':'var(--red)') + ';border-radius:8px;padding:10px 14px">' +
+            '<div style="font-size:11px;color:' + (net_ul>=0?'var(--green)':'var(--red)') + ';margin-bottom:4px">' + (net_ul>=0?'✅ Net Underload (ค่าต่ำสุดจาก ZFW/TOW/LDW)':'⚠ OVERLOAD') + '</div>' +
+            '<div style="font-size:28px;font-weight:700;font-family:var(--mono);color:' + (net_ul>=0?'var(--green)':'var(--red)') + '">' +
+              (net_ul>=0?'+':'') + Math.round(net_ul).toLocaleString() + ' ' + u + '</div>' +
+            '<div style="font-size:11px;color:var(--text3);margin-top:2px">= ' + (net_ul>=0?'+':'') + Math.round(net_ul*conv).toLocaleString() + ' ' + u2 + '</div>' +
+          '</div></div>'
+        : '<div style="font-size:12px;color:var(--text3);padding:10px;background:var(--bg3);border-radius:6px;border:1px dashed var(--border)">ใส่ Actual Traffic Load เพื่อคำนวณ Underload (ZFW / TOW / LDW)</div>';
+
+      underloadEl.innerHTML = s1 + s2 + s3;
+    }
+  } catch(e) {}
+}
+
+// ===================== PLANNING =====================
+// ── Planning color config ──
+var PLAN_STYLES = {
+  A:    { row: 'background:rgba(61,46,0,0.35);',      ap: 'background:rgba(61,46,0,0.55);color:#d29922;font-weight:600;',  cells: 'background:rgba(61,46,0,0.45);color:#d29922;font-weight:500;', cellsB: '', badge:'plan-a' },
+  B:    { row: 'background:rgba(31,90,63,0.35);',     ap: 'background:rgba(31,90,63,0.55);color:#3fb950;font-weight:600;', cells: '', cellsB: 'background:rgba(31,90,63,0.45);color:#3fb950;font-weight:500;', badge:'plan-b' },
+  NA:   { row: 'background:rgba(61,31,31,0.3);',      ap: 'background:rgba(61,31,31,0.5);color:#f85149;font-weight:600;',  cells: '', cellsB: '', badge:'plan-na' },
+  none: { row: '', ap: '', cells: '', cellsB: '', badge:'plan-none' },
+};
+
+var editingPlanIdx = -1;
+
+function renderPlanning(){
+  var tbody = document.getElementById('planning-tbody');
+  tbody.innerHTML = '';
+  var lastAP = '';
+  var lastAPIdx = -1;
+
+  planningData.forEach(function(r, i){
+    var plan = r.plan || 'none';
+    var st = PLAN_STYLES[plan] || PLAN_STYLES.none;
+    var isFirstRow = r.ap && r.ap !== lastAP;
+    if(r.ap) { lastAP = r.ap; lastAPIdx = i; }
+
+    var typeColor = r.type === 'ILS' ? 'tag-blue' : r.type === 'RNP' ? 'tag-purple' : 'tag-amber';
+    var tr = document.createElement('tr');
+    tr.style.cssText = st.row + 'transition:background 0.2s';
+
+    // Airport cell — first row shows name + ADD RWY button
+    var apCell, icaoCell;
+    if(isFirstRow){
+      apCell = '<td style="' + st.ap + 'border-radius:6px 0 0 6px;padding:7px 8px;font-size:13px;font-weight:600;vertical-align:top">' +
+        '<div>' + (r.ap||'') + '</div>' +
+        '<button onclick="addRwyToAirport(' + i + ')" style="margin-top:4px;background:rgba(88,166,255,0.12);border:1px solid rgba(88,166,255,0.3);border-radius:5px;color:var(--blue);font-size:10px;padding:2px 7px;cursor:pointer">+ RWY</button>' +
+        '</td>';
+      icaoCell = '<td class="mono" style="' + st.ap + 'font-size:12px;vertical-align:top;padding-top:9px">' + (r.icao||'') + '</td>';
+    } else {
+      apCell = '<td style="' + st.ap + 'padding:7px 8px;opacity:0.3"></td>';
+      icaoCell = '<td class="mono" style="' + st.ap + 'font-size:12px;opacity:0.3"></td>';
+    }
+
+    tr.innerHTML = apCell + icaoCell +
+      '<td class="mono" style="font-size:12px">' + r.rwy + '</td>' +
+      '<td><span class="tag ' + typeColor + '">' + r.type + '</span></td>' +
+      '<td class="mono" style="font-size:12px">' + r.dh + '</td>' +
+      '<td class="mono" style="font-size:12px">' + r.vis + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cells + 'border-radius:4px;padding:5px 9px">' + r.planADh + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cells + 'padding:5px 9px">' + r.planAVis + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cellsB + 'border-radius:4px;padding:5px 9px">' + r.planBDh + '</td>' +
+      '<td class="mono" style="font-size:12px;' + st.cellsB + 'padding:5px 9px">' + r.planBVis + '</td>' +
+      '<td>' +
+        '<select class="plan-select ' + st.badge + '" data-idx="' + i + '" onchange="setPlan(' + i + ',this.value,this)">' +
+          '<option value="none"' + (plan==='none'?' selected':'') + '>— เลือก</option>' +
+          '<option value="A"'  + (plan==='A'  ?' selected':'') + '>Plan A ⚠</option>' +
+          '<option value="B"'  + (plan==='B'  ?' selected':'') + '>Plan B ✅</option>' +
+          '<option value="NA"' + (plan==='NA' ?' selected':'') + '>N/A ❌</option>' +
+        '</select>' +
+      '</td>' +
+      '<td style="text-align:center;white-space:nowrap">' +
+        '<button onclick="openPlanModal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px 4px" title="แก้ไข">✏</button>' +
+        '<button onclick="deleteRwy(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:13px;padding:2px 4px" title="ลบ RWY นี้">🗑</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function addRwyToAirport(refIdx){
+  // Pre-fill modal with same airport info, blank runway
+  editingPlanIdx = -1;
+  var ref = planningData[refIdx];
+  document.getElementById('planModalTitle').textContent = '+ เพิ่ม RWY — ' + ref.ap;
+  document.getElementById('deletePlanBtn').style.display = 'none';
+  document.getElementById('pm_ap').value   = ref.ap;
+  document.getElementById('pm_icao').value  = ref.icao;
+  document.getElementById('pm_rwy').value   = '';
+  document.getElementById('pm_type').value  = 'ILS';
+  document.getElementById('pm_dh').value    = '';
+  document.getElementById('pm_vis').value   = '';
+  document.getElementById('pm_adh').value   = '';
+  document.getElementById('pm_avis').value  = '';
+  document.getElementById('pm_bdh').value   = '';
+  document.getElementById('pm_bvis').value  = '';
+  // Insert after the last row of same airport
+  var insertAfter = refIdx;
+  for(var j = refIdx; j < planningData.length; j++){
+    if(!planningData[j].ap || planningData[j].ap === ref.ap || planningData[j].ap === '') insertAfter = j;
+    else break;
+  }
+  document.getElementById('pm_insert_after').value = insertAfter || -1;
+  document.getElementById('planModal').classList.add('open');
+}
+
+function deleteRwy(i){
+  var r = planningData[i];
+  if(!confirm('ลบ ' + (r.ap||'') + ' ' + r.rwy + '?')) return;
+  // If this is the only runway of the airport, also remove it
+  planningData.splice(i, 1);
+  renderPlanning();
+  saveState();
+}
+
+function setPlan(i, val, el){
+  planningData[i].plan = val;
+  el.className = 'plan-select ' + (PLAN_STYLES[val]||PLAN_STYLES.none).badge;
+  renderPlanning();
+  saveState();
+}
+
+function autoCalcPlanAB(){
+  var dh = +document.getElementById('pm_dh').value || 0;
+  var vis = +document.getElementById('pm_vis').value || 0;
+  if(dh){ document.getElementById('pm_adh').value = dh + 400; document.getElementById('pm_bdh').value = dh + 200; }
+  if(vis){ document.getElementById('pm_avis').value = vis + 1500; document.getElementById('pm_bvis').value = vis + 800; }
+}
+
+function openPlanModal(idx){
+  editingPlanIdx = idx;
+  var isNew = idx === -1;
+  document.getElementById('planModalTitle').textContent = isNew ? '+ เพิ่มสนามบิน' : 'แก้ไข — ' + (planningData[idx].ap||'') + ' ' + planningData[idx].rwy;
+  document.getElementById('deletePlanBtn').style.display = isNew ? 'none' : 'inline-block';
+  if(!isNew){
+    var r = planningData[idx];
+    document.getElementById('pm_ap').value   = r.ap||'';
+    document.getElementById('pm_icao').value  = r.icao||'';
+    document.getElementById('pm_rwy').value   = r.rwy||'';
+    document.getElementById('pm_type').value  = r.type||'ILS';
+    document.getElementById('pm_dh').value    = r.dh||'';
+    document.getElementById('pm_vis').value   = r.vis||'';
+    document.getElementById('pm_adh').value   = r.planADh||'';
+    document.getElementById('pm_avis').value  = r.planAVis||'';
+    document.getElementById('pm_bdh').value   = r.planBDh||'';
+    document.getElementById('pm_bvis').value  = r.planBVis||'';
+  } else {
+    document.getElementById('pm_insert_after').value = -1;
+  ['pm_ap','pm_icao','pm_rwy','pm_dh','pm_vis','pm_adh','pm_avis','pm_bdh','pm_bvis'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('pm_type').value = 'ILS';
+  }
+  document.getElementById('planModal').classList.add('open');
+}
+
+function savePlanRow(){
+  var ap   = document.getElementById('pm_ap').value.trim();
+  var icao = document.getElementById('pm_icao').value.trim().toUpperCase();
+  var rwy  = document.getElementById('pm_rwy').value.trim();
+  var dh   = +document.getElementById('pm_dh').value;
+  var vis  = +document.getElementById('pm_vis').value;
+  if(!rwy || !dh || !vis){ alert('กรุณากรอก Runway, DH และ VIS'); return; }
+  var row = {
+    ap: ap, icao: icao, rwy: rwy,
+    type: document.getElementById('pm_type').value,
+    dh: dh, vis: vis,
+    planADh:  +document.getElementById('pm_adh').value  || dh+400,
+    planAVis: +document.getElementById('pm_avis').value || vis+1500,
+    planBDh:  +document.getElementById('pm_bdh').value  || dh+200,
+    planBVis: +document.getElementById('pm_bvis').value || vis+800,
+    plan: editingPlanIdx === -1 ? 'none' : (planningData[editingPlanIdx].plan||'none'),
+  };
+  var insertAfter = parseInt(document.getElementById('pm_insert_after').value);
+  if(editingPlanIdx === -1){
+    if(insertAfter >= 0 && insertAfter < planningData.length - 1){
+      planningData.splice(insertAfter + 1, 0, row);
+    } else {
+      planningData.push(row);
+    }
+  } else {
+    planningData[editingPlanIdx] = row;
+  }
+  closeModal('planModal');
+  renderPlanning();
+  saveState();
+}
+
+function deletePlanRow(){
+  if(!confirm('ลบ ' + (planningData[editingPlanIdx].ap||'') + ' ' + planningData[editingPlanIdx].rwy + '?')) return;
+  planningData.splice(editingPlanIdx, 1);
+  closeModal('planModal');
+  renderPlanning();
+  saveState();
+}
+
+// ===================== PNR =====================
+function calcPNR(){
+  const E=+document.getElementById('pnr_e').value||10;
+  const gs_out=+document.getElementById('pnr_out').value||500;
+  const gs_back=+document.getElementById('pnr_back').value||400;
+  const t=E*gs_back/(gs_out+gs_back);
+  const d=gs_out*t;
+  const h=Math.floor(t), m=Math.round((t-h)*60);
+  document.getElementById('pnr-result').innerHTML=`
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val mono">${h}h ${String(m).padStart(2,'0')}m</div><div class="stat-lbl">Time to PNR</div></div>
+      <div class="stat"><div class="stat-val mono">${Math.round(d).toLocaleString()}</div><div class="stat-lbl">Distance (NM)</div></div>
+      <div class="stat"><div class="stat-val mono">${t.toFixed(2)}</div><div class="stat-lbl">Decimal Hrs</div></div>
+    </div>`;
+}
+function calcCF(){
+  const tf=+document.getElementById('cf_trip').value||80000;
+  const c5=Math.round(tf*0.05), c3=Math.round(tf*0.03);
+  document.getElementById('cf-result').innerHTML=`
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val mono">${c5.toLocaleString()}</div><div class="stat-lbl">5% Standard (kg)</div></div>
+      <div class="stat"><div class="stat-val mono">${c3.toLocaleString()}</div><div class="stat-lbl">3% with ERA (kg)</div></div>
+      <div class="stat"><div class="stat-val mono" style="color:var(--green)">${(c5-c3).toLocaleString()}</div><div class="stat-lbl">Fuel Saved (kg)</div></div>
+    </div>`;
+}
+
+// ===================== LOCAL STORAGE — AUTO SAVE =====================
+var LS_KEY = 'tum_kma_v1';
+
+function clearChecks() {
+  if(!confirm('ล้าง Check List ทั้งหมดใช่ไหม?')) return;
+  Object.keys(checkState).forEach(function(k){ checkState[k] = {}; });
+  renderFlights();
+  saveState();
+}
+
+function saveState() {
+  try {
+    var state = {
+      checkState:    checkState,
+      planningPlans: planningData.map(function(r){ return r.plan; }),
+      fakData:       fakData,
+      flights_mel:   flights.map(function(f){ return {mel: f.mel, remark: f.remark}; }),
+      fakData_saved: JSON.parse(JSON.stringify(fakData)),
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    var state = JSON.parse(raw);
+
+    // Restore checkState
+    if (state.checkState) {
+      Object.keys(state.checkState).forEach(function(k){
+        checkState[k] = state.checkState[k];
+      });
+    }
+
+    // Restore plan selections
+    if (state.planningPlans) {
+      state.planningPlans.forEach(function(plan, i){
+        if (planningData[i]) planningData[i].plan = plan || 'none';
+      });
+    }
+
+    // Restore fakData
+    if (state.fakData) {
+      Object.keys(state.fakData).forEach(function(reg){
+        if (fakData[reg]) {
+          fakData[reg].fak  = state.fakData[reg].fak  || fakData[reg].fak;
+          fakData[reg].mel1 = state.fakData[reg].mel1 || state.fakData[reg].melNo || '';
+          fakData[reg].mel2 = state.fakData[reg].mel2 || '';
+          fakData[reg].mel3 = state.fakData[reg].mel3 || '';
+        }
+      });
+    }
+
+    // Restore MEL/remark per flight
+    if (state.flights_mel) {
+      state.flights_mel.forEach(function(d, i){
+        if (flights[i]) {
+          flights[i].mel    = d.mel    || '';
+          flights[i].remark = d.remark || '';
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+
+
+// ===================== DATA EXPORT / IMPORT =====================
+function exportUserData(){
+  var data = {
+    version: 2,
+    exported: new Date().toISOString(),
+    checkState: checkState,
+    planningPlans: planningData.map(function(r){ return r.plan; }),
+    fakData: JSON.parse(JSON.stringify(fakData)),
+    flights_custom: flights.map(function(f){ return {
+      no:f.no, reg:f.reg, dep:f.dep, arr:f.arr, std:f.std, sta:f.sta,
+      sector:f.sector, crew_fig:f.crew_fig, pic:f.pic, fo:f.fo,
+      fdp:f.fdp, maxfdp:f.maxfdp, rwy_dep:f.rwy_dep, rwy_arr:f.rwy_arr,
+      mel:f.mel, remark:f.remark
+    };}),
+    planningData_custom: planningData,
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'tum_data_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importUserData(){
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var data = JSON.parse(ev.target.result);
+        if(data.checkState) Object.assign(checkState, data.checkState);
+        if(data.planningPlans) data.planningPlans.forEach(function(p,i){ if(planningData[i]) planningData[i].plan = p||'none'; });
+        if(data.fakData) Object.keys(data.fakData).forEach(function(k){ if(fakData[k]) Object.assign(fakData[k], data.fakData[k]); });
+        if(data.flights_custom) data.flights_custom.forEach(function(f,i){ if(flights[i]) Object.assign(flights[i], f); });
+        if(data.planningData_custom && data.planningData_custom.length > 0) {
+          // Merge custom airports not in default list
+          planningData.length = 0;
+          data.planningData_custom.forEach(function(r){ planningData.push(r); });
+        }
+        saveState();
+        renderFlights(); renderFAK(); renderPlanning();
+        alert('✅ นำเข้าข้อมูลสำเร็จ!');
+      } catch(err) { alert('❌ ไฟล์ไม่ถูกต้อง: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ===================== SIDEBAR TOGGLE =====================
+function toggleSidebar(){
+  var layout = document.querySelector('.layout');
+  var toggle = document.getElementById('sidebarToggle');
+  var collapsed = layout.classList.toggle('sidebar-collapsed');
+  document.getElementById('sidebar').classList.toggle('collapsed', collapsed);
+  toggle.textContent = collapsed ? '▶' : '◀';
+  localStorage.setItem('sidebar_collapsed', collapsed ? '1' : '0');
+}
+
+function initSidebar(){
+  if(localStorage.getItem('sidebar_collapsed') === '1'){
+    var layout = document.querySelector('.layout');
+    document.getElementById('sidebar').classList.add('collapsed');
+    layout.classList.add('sidebar-collapsed');
+    document.getElementById('sidebarToggle').textContent = '▶';
+  }
+}
+
+// ===================== INIT =====================
+loadState();
+initSidebar();
+renderFlights();
+renderFAK();
+renderPlanning();
+fillAC();
+calcPNR();
+calcCF();
+
+document.getElementById('pnr_e').addEventListener('input',calcPNR);
+document.getElementById('pnr_out').addEventListener('input',calcPNR);
+document.getElementById('pnr_back').addEventListener('input',calcPNR);
+document.getElementById('cf_trip').addEventListener('input',calcCF);
+</script>
+
+<script>
+// ===================== PWA INSTALL =====================
+var deferredPrompt = null;
+
+// Dynamic Web App Manifest
+(function(){
+  var manifest = {
+    name: "TUM Check List \u2014 K-Mile Air",
+    short_name: "TUM K-Mile",
+    description: "K-Mile Air Flight Operations Daily Check List",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#0d1117",
+    theme_color: "#0d1117",
+    orientation: "landscape",
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230d1117'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' fill='%2358a6ff'%3E%E2%9C%88%3C/text%3E%3C/svg%3E",
+        sizes: "192x192", type: "image/svg+xml", purpose: "any maskable"
+      },
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230d1117'/%3E%3Ctext x='256' y='340' font-size='290' text-anchor='middle' fill='%2358a6ff'%3E%E2%9C%88%3C/text%3E%3C/svg%3E",
+        sizes: "512x512", type: "image/svg+xml", purpose: "any maskable"
+      }
+    ]
+  };
+  var blob = new Blob([JSON.stringify(manifest)], {type: "application/json"});
+  document.getElementById("pwa-manifest").href = URL.createObjectURL(blob);
+})();
+
+// Android/Chrome install prompt
+window.addEventListener("beforeinstallprompt", function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var btn = document.getElementById("install-btn");
+  if (btn) btn.style.display = "inline-block";
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function() {
+      deferredPrompt = null;
+      var btn = document.getElementById("install-btn");
+      if (btn) btn.style.display = "none";
+    });
+  } else {
+    showIOSInstall();
+  }
+}
+
+function closeIOSModal() {
+  var el = document.getElementById("ios-modal");
+  if (el) el.remove();
+}
+
+function showIOSInstall() {
+  var existing = document.getElementById("ios-modal");
+  if (existing) { existing.remove(); return; }
+
+  var div = document.createElement("div");
+  div.id = "ios-modal";
+  div.style.cssText = [
+    "position:fixed", "bottom:20px", "left:50%", "transform:translateX(-50%)",
+    "background:#161b22", "border:1px solid #58a6ff", "border-radius:12px",
+    "padding:16px 20px", "max-width:380px", "width:90%", "z-index:9999",
+    "box-shadow:0 8px 32px rgba(0,0,0,0.6)"
+  ].join(";");
+
+  var h = document.createElement("div");
+  h.style.cssText = "font-size:13px;font-weight:600;color:#58a6ff;margin-bottom:10px";
+  h.textContent = "\uD83D\uDCF2 วิธีติดตั้ง App บน Tablet / มือถือ";
+  div.appendChild(h);
+
+  var body = document.createElement("div");
+  body.style.cssText = "font-size:12px;color:#8b949e;line-height:2";
+  body.innerHTML = [
+    "<b style='color:#e6edf3'>iPad / iPhone (Safari):</b><br>",
+    "1. กดปุ่ม แชร์ (&#9633;&#8593;) ด้านล่าง Safari<br>",
+    "2. เลือก <b style='color:#e6edf3'>Add to Home Screen</b><br>",
+    "3. กด <b style='color:#3fb950'>Add</b> \u2014 ไอคอนจะปรากฏบน Home Screen<br><br>",
+    "<b style='color:#e6edf3'>Android (Chrome):</b><br>",
+    "กด \u22EE \u2192 Add to Home screen"
+  ].join("");
+  div.appendChild(body);
+
+  var btn = document.createElement("button");
+  btn.textContent = "ตกลง";
+  btn.style.cssText = "margin-top:12px;width:100%;background:#238636;color:#fff;border:none;border-radius:6px;padding:8px;font-size:12px;cursor:pointer";
+  btn.onclick = closeIOSModal;
+  div.appendChild(btn);
+
+  document.body.appendChild(div);
+  setTimeout(closeIOSModal, 20000);
+}
+
+// Show install button on iOS (doesn't fire beforeinstallprompt)
+window.addEventListener("load", function() {
+  var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+  var isStandalone = (window.navigator.standalone === true) ||
+                     window.matchMedia("(display-mode: standalone)").matches;
+  var btn = document.getElementById("install-btn");
+  if (!isStandalone) {
+    if (btn) btn.style.display = "inline-block";
+  } else {
+    if (btn) btn.style.display = "none";
+  }
+});
+
+// Service Worker — offline support
+if ("serviceWorker" in navigator) {
+  var SW_CODE = [
+    "var CACHE = 'tum-kma-v2';",
+    "self.addEventListener('install', function(e) {",
+    "  e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(['/']); }));",
+    "  self.skipWaiting();",
+    "});",
+    "self.addEventListener('activate', function(e) {",
+    "  e.waitUntil(caches.keys().then(function(keys) {",
+    "    return Promise.all(keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); }));",
+    "  }));",
+    "  self.clients.claim();",
+    "});",
+    "self.addEventListener('fetch', function(e) {",
+    "  e.respondWith(caches.match(e.request).then(function(r) {",
+    "    return r || fetch(e.request).catch(function() {",
+    "      return new Response('Offline', {status: 503});",
+    "    });",
+    "  }));",
+    "});"
+  ].join("\n");
+
+  var swBlob = new Blob([SW_CODE], {type: "application/javascript"});
+  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+}
+</script>
+
+
+</body>
+</html>

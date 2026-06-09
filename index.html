@@ -173,6 +173,13 @@ select.inp{cursor:pointer}
 .dsp-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
 .dsp-pane{display:none}
 .dsp-pane.active{display:block}
+
+/* ===== NAV AIDS TABS ===== */
+.nav-tab{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 11px;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all 0.12s;white-space:nowrap}
+.nav-tab:hover{background:var(--bg4);color:var(--text)}
+.nav-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
+.nav-pane{display:none}
+.nav-pane.active{display:block}
 </style>
 </head>
 <body>
@@ -1331,52 +1338,524 @@ select.inp{cursor:pointer}
 
 <div class="page" id="page-nav_aids">
       <div class="page-hd">NAV AIDs — Navigational Aids</div>
-      <div class="page-sub">ประวัติและหลักการทำงานของระบบนำทางอากาศ ตั้งแต่อดีตถึงปัจจุบัน</div>
-      <div class="card">
-        <div class="card-title">📊 Summary — ทุกยุค</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>ยุค</th><th>ระบบ</th><th>หลักการทำงาน</th><th>ข้อดี</th><th>ข้อเสีย</th></tr></thead>
-            <tbody>
-              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1900–1920</td><td class="mono">Pilotage</td><td>บินเทียบแผนที่ ดูแม่น้ำ ทางรถไฟ</td><td>ไม่ต้องการอุปกรณ์</td><td>ต้องมองเห็น</td></tr>
-              <tr><td class="mono">Dead Reckoning</td><td>เข็มทิศ + นาฬิกา + ความเร็ว</td><td>บินกลางคืนได้</td><td>Error สะสม</td></tr>
-              <tr><td style="color:var(--text3)">1920–1940</td><td class="mono">NDB / ADF</td><td>เข็ม ADF ชี้สถานี (LF/MF)</td><td>ง่าย ราคาถูก</td><td>CB รบกวน Night Effect</td></tr>
-              <tr><td rowspan="3" style="vertical-align:top;color:var(--text3)">1950–1990</td><td class="mono">VOR</td><td>Radial 360° (VHF) บอกทิศ</td><td>แม่นกว่า NDB</td><td>Line of Sight</td></tr>
-              <tr><td class="mono">DME</td><td>วัดระยะทางจาก Station</td><td>รู้ตำแหน่งชัดเจน</td><td>ต้องใช้คู่ VOR</td></tr>
-              <tr><td class="mono">ILS</td><td>LOC(ซ้าย-ขวา) + GS(สูง-ต่ำ)</td><td>ลงจอดทัศนวิสัยต่ำได้</td><td>ต้องมีอุปกรณ์สนามบิน</td></tr>
-              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1970–ปัจจุบัน</td><td class="mono">INS / IRS</td><td>Gyro + Accelerometer นำทางตัวเอง</td><td>อิสระจาก Ground Station</td><td>Drift นาน</td></tr>
-              <tr><td class="mono">FMS / RNAV</td><td>รวมข้อมูลทุก Navaid + Waypoints</td><td>บินลัดตรง A→B</td><td>ต้อง Database ถูกต้อง</td></tr>
-              <tr><td rowspan="2" style="vertical-align:top;color:var(--text3)">1990–ปัจจุบัน</td><td class="mono">GNSS / GPS</td><td>ดาวเทียม 4+ ดวง → 3D Position</td><td>แม่นมาก ครอบคลุมทั่วโลก</td><td>Jamming / Spoofing</td></tr>
-              <tr><td class="mono">PBN (RNAV/RNP)</td><td>กำหนด Performance ที่ต้องได้</td><td>ยืดหยุ่น ไม่ผูกกับอุปกรณ์</td><td>—</td></tr>
-            </tbody>
-          </table>
+      <div class="page-sub">ระบบนำทางอากาศ — ประวัติ หลักการ และสิ่งที่ Dispatcher &amp; นักบินต้องรู้</div>
+
+      <!-- NAV TAB BAR -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="nav-tab active" id="ntab-overview" onclick="showNTab('overview',this)">📊 Overview</button>
+        <button class="nav-tab" id="ntab-groundnav" onclick="showNTab('groundnav',this)">📡 Ground-Based</button>
+        <button class="nav-tab" id="ntab-ils" onclick="showNTab('ils',this)">🛬 ILS &amp; Approach</button>
+        <button class="nav-tab" id="ntab-pbn" onclick="showNTab('pbn',this)">🛰 GNSS &amp; PBN</button>
+        <button class="nav-tab" id="ntab-dispatch" onclick="showNTab('dispatch',this)">✈ Dispatcher Use</button>
+      </div>
+
+      <!-- OVERVIEW TAB -->
+      <div class="nav-pane active" id="npane-overview">
+        <div class="card">
+          <div class="card-title">📊 Summary — วิวัฒนาการระบบนำทางอากาศ</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>ยุค</th><th>ระบบ</th><th>หลักการทำงาน</th><th>ข้อดี</th><th>ข้อเสีย</th></tr></thead>
+              <tbody>
+                <tr><td rowspan="2" style="vertical-align:top;color:var(--text3);white-space:nowrap">1900–1920</td>
+                  <td class="mono">Pilotage</td><td>บินเทียบแผนที่ ดูแม่น้ำ ทางรถไฟ</td><td>ไม่ต้องการอุปกรณ์</td><td>ต้องมองเห็น</td></tr>
+                <tr><td class="mono">Dead Reckoning</td><td>เข็มทิศ + นาฬิกา + ความเร็ว</td><td>บินกลางคืนได้</td><td>Error สะสม</td></tr>
+                <tr><td style="color:var(--text3);white-space:nowrap">1920–1940</td>
+                  <td class="mono">NDB / ADF</td><td>เข็ม ADF ชี้สถานี (LF/MF)</td><td>ง่าย ราคาถูก</td><td>CB รบกวน Night Effect</td></tr>
+                <tr><td rowspan="3" style="vertical-align:top;color:var(--text3);white-space:nowrap">1950–1990</td>
+                  <td class="mono">VOR</td><td>Radial 360° (VHF) บอกทิศ</td><td>แม่นกว่า NDB</td><td>Line of Sight</td></tr>
+                <tr><td class="mono">DME</td><td>วัดระยะทางจาก Station</td><td>รู้ตำแหน่งชัดเจน</td><td>ต้องใช้คู่ VOR</td></tr>
+                <tr><td class="mono">ILS</td><td>LOC(ซ้าย-ขวา) + GS(สูง-ต่ำ)</td><td>ลงจอดทัศนวิสัยต่ำได้</td><td>ต้องมีอุปกรณ์สนามบิน</td></tr>
+                <tr><td rowspan="2" style="vertical-align:top;color:var(--text3);white-space:nowrap">1970–ปัจจุบัน</td>
+                  <td class="mono">INS / IRS</td><td>Gyro + Accelerometer นำทางตัวเอง</td><td>อิสระจาก Ground Station</td><td>Drift นาน</td></tr>
+                <tr><td class="mono">FMS / RNAV</td><td>รวมข้อมูลทุก Navaid + Waypoints</td><td>บินลัดตรง A→B</td><td>ต้อง Database ถูกต้อง</td></tr>
+                <tr><td rowspan="2" style="vertical-align:top;color:var(--text3);white-space:nowrap">1990–ปัจจุบัน</td>
+                  <td class="mono">GNSS / GPS</td><td>ดาวเทียม 4+ ดวง → 3D Position</td><td>แม่นมาก ครอบคลุมทั่วโลก</td><td>Jamming / Spoofing</td></tr>
+                <tr><td class="mono">PBN (RNAV/RNP)</td><td>กำหนด Performance ที่ต้องได้</td><td>ยืดหยุ่น ไม่ผูกกับอุปกรณ์</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="sec-grid">
+          <div class="card">
+            <div class="card-title">📻 Frequency Bands ที่ใช้ใน Aviation</div>
+            <table>
+              <thead><tr><th>Band</th><th>ความถี่</th><th>ระบบที่ใช้</th><th>ลักษณะ</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tag tag-blue">LF</span></td><td class="mono">30–300 kHz</td><td>NDB (บางส่วน)</td><td>ระยะไกล แต่ CB รบกวน</td></tr>
+                <tr><td><span class="tag tag-blue">MF</span></td><td class="mono">300 kHz–3 MHz</td><td>NDB (190–1750 kHz)</td><td>Ground wave เดินทางไกล</td></tr>
+                <tr><td><span class="tag tag-green">HF</span></td><td class="mono">3–30 MHz</td><td>HF Comm (Oceanic)</td><td>Sky wave ข้ามมหาสมุทร</td></tr>
+                <tr><td><span class="tag tag-amber">VHF</span></td><td class="mono">30–300 MHz</td><td>VOR, ILS LOC, Comm</td><td>Line of Sight ชัดเจน</td></tr>
+                <tr><td><span class="tag tag-amber">UHF</span></td><td class="mono">300 MHz–3 GHz</td><td>DME, ILS GS, GPS, ADS-B</td><td>Line of Sight แม่นยำ</td></tr>
+                <tr><td><span class="tag tag-red">SHF</span></td><td class="mono">3–30 GHz</td><td>Weather Radar, MLS</td><td>ระยะสั้น แม่นมาก</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">🔑 Key Frequencies Reference</div>
+            <table>
+              <thead><tr><th>ระบบ</th><th>ความถี่</th><th>หมายเหตุ</th></tr></thead>
+              <tbody>
+                <tr><td><b>VOR</b></td><td class="mono">108.00–117.95 MHz</td><td>Paired กับ DME อัตโนมัติ</td></tr>
+                <tr><td><b>ILS LOC</b></td><td class="mono">108.10–111.95 MHz</td><td>Odd decimals only</td></tr>
+                <tr><td><b>ILS GS</b></td><td class="mono">329.15–335.00 MHz</td><td>Auto-paired กับ LOC</td></tr>
+                <tr><td><b>Marker</b></td><td class="mono">75 MHz</td><td>OM / MM / IM</td></tr>
+                <tr><td><b>DME</b></td><td class="mono">962–1213 MHz</td><td>UHF Transponder</td></tr>
+                <tr><td><b>NDB</b></td><td class="mono">190–1750 kHz</td><td>ADF รับสัญญาณ</td></tr>
+                <tr><td><b>GPS L1</b></td><td class="mono">1575.42 MHz</td><td>Civilian GPS</td></tr>
+                <tr><td><b>GPS L5</b></td><td class="mono">1176.45 MHz</td><td>Aviation Safety of Life</td></tr>
+                <tr><td><b>ADS-B</b></td><td class="mono">1090 MHz</td><td>Extended Squitter</td></tr>
+                <tr><td><b>Guard VHF</b></td><td class="mono">121.5 MHz</td><td>Emergency — ทุก AC รับฟัง</td></tr>
+                <tr><td><b>Guard UHF</b></td><td class="mono">243.0 MHz</td><td>Military Emergency</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="sec-grid">
-        <div class="card">
-          <div class="card-title">🌟 RNAV vs RNP</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-            <div style="background:var(--blue-bg);border:1px solid var(--blue);border-radius:7px;padding:10px">
-              <b style="color:var(--blue)">RNAV</b>
-              <div style="color:var(--text2);margin-top:5px;line-height:1.7">บินตาม Waypoints โดยตรง ไม่ต้อง VOR-to-VOR<br>ไม่มีระบบเตือนภัย นักบินต้องตรวจสอบเอง<br>เช่น RNAV 1 = ±1 NM</div>
+
+      <!-- GROUND-BASED NAV TAB -->
+      <div class="nav-pane" id="npane-groundnav">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">📡 VOR — VHF Omnidirectional Range</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">หลักการ:</b> ส่งสัญญาณ VHF 360° บอก Magnetic Bearing จากสถานีถึงอากาศยาน<br>
+                <b style="color:var(--text)">ความถี่:</b> 108.00–117.95 MHz | <b>ระยะ:</b> ~200 NM ที่ High Altitude
+              </div>
+              <table>
+                <thead><tr><th>ประเภท</th><th>ลักษณะ</th></tr></thead>
+                <tbody>
+                  <tr><td><b>VOR</b></td><td>VOR เดี่ยว — บอกทิศ Radial เท่านั้น</td></tr>
+                  <tr><td><b>VOR/DME</b></td><td>VOR + DME — บอกทิศ + ระยะ ได้ Position Fix</td></tr>
+                  <tr><td><b>VORTAC</b></td><td>VOR + TACAN (Military DME) รวมกัน</td></tr>
+                  <tr><td><b>DVOR</b></td><td>Doppler VOR — แม่นยำกว่า CVOR ลด Site Error</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:7px;font-size:12px;color:var(--text2);line-height:1.9">
+                <b style="color:var(--amber)">ข้อจำกัด:</b> Line of Sight — ถูกบดบังด้วยภูเขา | Scalloping ในพื้นที่ Mountainous<br>
+                <b style="color:var(--text)">Accuracy:</b> ±1.4° (ICAO Standard) | TO/FROM flag บอกทิศบิน
+              </div>
             </div>
-            <div style="background:var(--purple-bg);border:1px solid var(--purple);border-radius:7px;padding:10px">
-              <b style="color:var(--purple)">RNP</b>
-              <div style="color:var(--text2);margin-top:5px;line-height:1.7">เหมือน RNAV + มี OPMA<br>(On-board Monitoring & Alerting)<br>ระบบเตือนอัตโนมัติ สามารถบินโค้งได้<br>เช่น RNP 0.3 = ±0.3 NM</div>
+            <div class="card">
+              <div class="card-title">📏 DME — Distance Measuring Equipment</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">หลักการ:</b> Aircraft ส่งสัญญาณ Interrogation → Ground Station ตอบ Reply → คำนวณ Time → ระยะทาง<br>
+                <b style="color:var(--text)">ความถี่:</b> 962–1213 MHz | <b>ระยะ:</b> สูงสุด 200 NM
+              </div>
+              <table>
+                <thead><tr><th>Term</th><th>ความหมาย</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Slant Range</b></td><td>ระยะเอียงจาก AC ถึง Station (ไม่ใช่ Ground Distance)</td></tr>
+                  <tr><td><b>Slant Range Error</b></td><td>ผิดพลาดน้อยเมื่ออยู่ไกล มากเมื่ออยู่เหนือ Station โดยตรง</td></tr>
+                  <tr><td><b>DME/DME Fix</b></td><td>ใช้ 2 สถานี DME ตัดกัน → Position Fix ไม่ต้องพึ่ง VOR</td></tr>
+                  <tr><td><b>Crossing Angle</b></td><td>ควร ≥30° เพื่อ Accuracy ดี (เหมาะ 60°–120°)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🔊 NDB / ADF — Non-Directional Beacon</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">หลักการ:</b> NDB ส่งสัญญาณ LF/MF ทุกทิศทาง ADF ในเครื่องบินหาทิศที่แรงที่สุด → Relative Bearing<br>
+                <b style="color:var(--text)">ความถี่:</b> 190–1750 kHz
+              </div>
+              <table>
+                <thead><tr><th>ปัญหา</th><th>สาเหตุ</th><th>ผลกระทบ</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Night Effect</b></td><td>Sky wave รบกวน Ground wave ตอนกลางคืน</td><td>Bearing Error ±5°</td></tr>
+                  <tr><td><b>CB Effect</b></td><td>ฟ้าแลบดึง ADF Needle</td><td>Needle สั่น ผิดพลาด</td></tr>
+                  <tr><td><b>Coastal Refraction</b></td><td>สัญญาณหักเหที่ชายฝั่ง</td><td>Bearing Error</td></tr>
+                  <tr><td><b>Quadrantal Error</b></td><td>โครงสร้าง AC รบกวนเสาอากาศ ADF</td><td>Bearing ผิดพลาดเป็น Pattern</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🧭 INS / IRS — Inertial Navigation / Reference System</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--text)">หลักการ:</b> Accelerometers วัดการเร่ง + Gyroscopes วัดทิศทาง → คำนวณ Position โดยไม่ต้องพึ่ง Ground Signal<br>
+                <b style="color:var(--amber)">Self-Contained — ทำงานได้แม้ไม่มีสัญญาณภายนอก</b>
+              </div>
+              <table>
+                <thead><tr><th>ประเด็น</th><th>รายละเอียด</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Align Time</b></td><td>ต้องใช้เวลา Align ก่อนบิน ~5–15 นาที ขณะเครื่องจอดนิ่ง</td></tr>
+                  <tr><td><b>Drift Error</b></td><td>Error สะสมตามเวลา ~2 NM/hr (IRS ดีกว่า INS)</td></tr>
+                  <tr><td><b>FMS Integration</b></td><td>FMS ใช้ IRS + GPS/VOR ร่วมกัน ลด Drift ด้วย Radio Updating</td></tr>
+                  <tr><td><b>Oceanic Use</b></td><td>บนทะเลหาก GPS fail → IRS เป็น Backup หลัก</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🖥 FMS — Flight Management System</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">FMS รวมข้อมูลจาก:</b><br>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+                  <div style="background:var(--bg3);border-radius:6px;padding:8px">
+                    <b style="color:var(--blue)">Sensors</b>
+                    <div style="margin-top:4px;line-height:1.9">• IRS/INS (Primary)<br>• GPS/GNSS<br>• VOR/DME<br>• Air Data (ADC)</div>
+                  </div>
+                  <div style="background:var(--bg3);border-radius:6px;padding:8px">
+                    <b style="color:var(--green)">Databases</b>
+                    <div style="margin-top:4px;line-height:1.9">• Navigation DB (28-day AIRAC)<br>• Performance DB<br>• Airline Route DB<br>• Airport DB</div>
+                  </div>
+                </div>
+                <div style="margin-top:8px;padding:8px;background:var(--amber-bg);border:1px solid var(--amber);border-radius:6px">
+                  <b style="color:var(--amber)">AIRAC Cycle:</b> อัปเดตทุก 28 วัน — Dispatcher ต้องตรวจว่า FMS Database เป็น Current Cycle ก่อน Release
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📡 ADS-B — Automatic Dependent Surveillance-Broadcast</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ADS-B Out:</b> AC ส่ง Position/Speed/ID ออก 1090 MHz ทุก ~0.5 วินาที<br>
+                <b style="color:var(--text)">ADS-B In:</b> รับข้อมูลจาก AC อื่น — Traffic awareness (CDTI)<br><br>
+                <table>
+                  <thead><tr><th>ข้อมูลที่ Broadcast</th><th>แหล่งที่มา</th></tr></thead>
+                  <tbody>
+                    <tr><td>Position (Lat/Lon)</td><td>GPS/GNSS</td></tr>
+                    <tr><td>Barometric Altitude</td><td>Air Data</td></tr>
+                    <tr><td>Ground Speed / Track</td><td>GPS</td></tr>
+                    <tr><td>Flight ID / Callsign</td><td>FMS / Transponder</td></tr>
+                    <tr><td>Emergency Status</td><td>Squawk 7700</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-title">📡 ILS Components</div>
-          <div style="font-size:12px;line-height:2.1;color:var(--text2)">
-            <div><span style="color:var(--blue)">Localizer (LOC)</span> — แนว ซ้าย-ขวา ให้ตรงกึ่งกลาง Runway (110–111.95 MHz)</div>
-            <div><span style="color:var(--green)">Glide Slope (GS)</span> — แนว สูง-ต่ำ มุมร่อนปกติ 3° (329.15–335.00 MHz)</div>
-            <div><span style="color:var(--amber)">Outer Marker (OM)</span> — ห่าง ~7.2 km จาก Threshold เสียง 400 Hz ——</div>
-            <div><span style="color:var(--amber)">Middle Marker (MM)</span> — ห่าง ~1.1 km เสียง 1300 Hz -.-.-</div>
-            <div><span style="color:var(--red)">Inner Marker (IM)</span> — CAT II/III ใกล้ Threshold เสียง 3000 Hz ···</div>
+      </div>
+
+      <!-- ILS & APPROACH TAB -->
+      <div class="nav-pane" id="npane-ils">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">🛬 ILS — Instrument Landing System</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:10px">
+                <b style="color:var(--blue)">Localizer (LOC)</b> — 108.10–111.95 MHz | แนวซ้าย-ขวา ±2.5° Full Scale<br>
+                <b style="color:var(--green)">Glide Slope (GS)</b> — 329.15–335.00 MHz | แนวสูง-ต่ำ มุมร่อนปกติ 3°<br>
+                <b style="color:var(--amber)">Marker Beacons</b> — 75 MHz | OM(Blue/——) MM(Amber/·—·) IM(White/···)
+              </div>
+              <div class="card-title" style="margin-top:10px">ILS Categories — Dispatcher &amp; Crew Must Know</div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th><th>DH</th><th>RVR</th>
+                      <th>Aircraft Req.</th><th>Crew Req.</th><th>Airport Req.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="tag tag-green">CAT I</span></td>
+                      <td class="mono">≥200ft</td><td class="mono">≥550m (vis 800m)</td>
+                      <td>Standard ILS</td><td>Standard IR</td><td>LOC+GS+PAPI/VASI</td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag tag-amber">CAT II</span></td>
+                      <td class="mono">100–199ft</td><td class="mono">≥300m</td>
+                      <td>Dual AP/FD + Alt</td><td>CAT II trained + recency</td><td>LOC+GS+ALS+RVR sensors</td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag tag-red">CAT IIIa</span></td>
+                      <td class="mono">&lt;100ft/No DH</td><td class="mono">≥200m</td>
+                      <td>Autoland Fail-Passive</td><td>CAT III trained</td><td>TDZ RVR+Midpoint RVR</td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag tag-red">CAT IIIb</span></td>
+                      <td class="mono">&lt;50ft/No DH</td><td class="mono">75–200m</td>
+                      <td>Fail-Operational</td><td>CAT IIIb trained</td><td>TDZ+Mid+Rollout RVR</td>
+                    </tr>
+                    <tr>
+                      <td><span class="tag tag-red">CAT IIIc</span></td>
+                      <td class="mono">No DH</td><td class="mono">No limit</td>
+                      <td>Dual Fail-Op.</td><td>Special auth.</td><td>ไม่ได้ใช้จริง</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="warn-box" style="margin-top:8px">
+                <b>CRITICAL:</b> Dispatcher ต้องตรวจว่า Airport certified + Aircraft approved + Crew มี recency ครบ ก่อน dispatch ในสภาพอากาศต่ำกว่า CAT I minima
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🎯 Approach Types &amp; Minima</div>
+              <table>
+                <thead><tr><th>ประเภท</th><th>Minima</th><th>Guidance</th><th>ตัวอย่าง</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><b style="color:var(--blue)">Precision (PA)</b></td>
+                    <td>DA/H</td><td>Lateral + Vertical</td><td>ILS, GLS, LPV</td>
+                  </tr>
+                  <tr>
+                    <td><b style="color:var(--amber)">APV</b></td>
+                    <td>DA/H</td><td>Lateral + Advisory Vert.</td><td>LNAV/VNAV, LPV(SBAS)</td>
+                  </tr>
+                  <tr>
+                    <td><b style="color:var(--text2)">Non-Precision (NPA)</b></td>
+                    <td>MDA/H</td><td>Lateral only</td><td>VOR, NDB, LNAV</td>
+                  </tr>
+                  <tr>
+                    <td><b>Circling</b></td>
+                    <td>MDA + VIS</td><td>Visual circuit</td><td>ทุกประเภท</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="margin-top:10px;font-size:12px;color:var(--text2);line-height:2;background:var(--bg3);border-radius:7px;padding:10px">
+                <b style="color:var(--text)">DA (Decision Altitude)</b> — อ้างอิง MSL | <b>DH</b> — อ้างอิง Threshold Elevation<br>
+                <b style="color:var(--text)">MDA (Minimum Descent Altitude)</b> — ต้องอยู่เหนือนี้จนเห็น Runway<br>
+                <b style="color:var(--text)">MAP (Missed Approach Point)</b> — จุดที่ต้อง Go-Around ถ้าไม่เห็น Runway
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🛫 SID / STAR / IAP</div>
+              <div style="display:grid;grid-template-columns:1fr;gap:8px;font-size:12px">
+                <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:7px;padding:10px">
+                  <b style="color:var(--green)">SID — Standard Instrument Departure</b>
+                  <div style="color:var(--text2);margin-top:5px;line-height:1.9">
+                    เส้นทางออกมาตรฐาน ลด ATC Workload | มี Obstacle Clearance Guarantee<br>
+                    มี ODP (Obstacle Departure Procedure) สำหรับ Engine Failure<br>
+                    <b>Dispatcher ระบุ SID ใน Field 15 ของ ATC FPL</b>
+                  </div>
+                </div>
+                <div style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:7px;padding:10px">
+                  <b style="color:var(--amber)">STAR — Standard Terminal Arrival Route</b>
+                  <div style="color:var(--text2);margin-top:5px;line-height:1.9">
+                    เส้นทางเข้า Terminal Area จาก En-route | กำหนด Speed/Altitude constraints<br>
+                    <b>Dispatcher ระบุ STAR ที่คาดไว้ในแผนบิน</b>
+                  </div>
+                </div>
+                <div style="background:var(--blue-bg);border:1px solid var(--blue);border-radius:7px;padding:10px">
+                  <b style="color:var(--blue)">IAP — Instrument Approach Procedure</b>
+                  <div style="color:var(--text2);margin-top:5px;line-height:1.9">
+                    <b>Precision:</b> ILS, GLS, LPV — มี Vertical Guidance<br>
+                    <b>APV:</b> RNAV(GNSS) LNAV/VNAV — Advisory Vertical<br>
+                    <b>Non-Precision:</b> VOR, NDB, LOC — Lateral only<br>
+                    <b>Dispatcher ใช้ Minima จาก IAP Chart เปรียบเทียบกับ TAF</b>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- GNSS & PBN TAB -->
+      <div class="nav-pane" id="npane-pbn">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">🛰 GNSS — Global Navigation Satellite System</div>
+              <table>
+                <thead><tr><th>ระบบ</th><th>ประเทศ</th><th>ดาวเทียม</th><th>ความถี่หลัก</th><th>หมายเหตุ</th></tr></thead>
+                <tbody>
+                  <tr><td><b style="color:var(--blue)">GPS</b></td><td>USA</td><td class="mono">31</td><td class="mono">L1 1575.42 / L5 1176.45 MHz</td><td>ใช้มากที่สุดในการบิน</td></tr>
+                  <tr><td><b style="color:var(--red)">GLONASS</b></td><td>Russia</td><td class="mono">24</td><td class="mono">L1 1602 / L2 1246 MHz</td><td>ระบบสำรอง</td></tr>
+                  <tr><td><b style="color:var(--amber)">Galileo</b></td><td>EU</td><td class="mono">30</td><td class="mono">E1 1575.42 / E5 1176.45 MHz</td><td>Civilian focus</td></tr>
+                  <tr><td><b style="color:var(--green)">BeiDou</b></td><td>China</td><td class="mono">45+</td><td class="mono">B1 1561 / B2 1207 MHz</td><td>ครอบคลุม Asia-Pacific</td></tr>
+                  <tr><td><b>SBAS</b></td><td>Regional</td><td>—</td><td class="mono">1575.42 MHz</td><td>WAAS/EGNOS/MSAS เพิ่ม accuracy &lt;3m</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:10px;font-size:12px;color:var(--text2);line-height:1.9;background:var(--bg3);border-radius:7px;padding:10px">
+                <b style="color:var(--text)">ต้องการดาวเทียมอย่างน้อย 4 ดวง</b> เพื่อ 3D Position Fix<br>
+                <b style="color:var(--amber)">RAIM (Receiver Autonomous Integrity Monitoring)</b> — ตรวจสอบ GPS Integrity อัตโนมัติ<br>
+                ต้องมี RAIM Available ก่อน GPS Approach | Dispatcher ตรวจ RAIM Prediction ก่อน Release
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⚠ GNSS Threats ที่ Dispatcher ต้องรู้</div>
+              <table>
+                <thead><tr><th>ภัยคุกคาม</th><th>ลักษณะ</th><th>ผลกระทบ</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><b style="color:var(--amber)">Jamming</b></td>
+                    <td>ส่งสัญญาณรบกวน → GPS รับสัญญาณไม่ได้</td>
+                    <td>GPS Loss — FMS ใช้ IRS/VOR แทน</td>
+                    <td>ตรวจ NOTAM GPS UNRELIABLE</td>
+                  </tr>
+                  <tr>
+                    <td><b style="color:var(--red)">Spoofing</b></td>
+                    <td>ส่งสัญญาณ GPS ปลอม → Position ผิด</td>
+                    <td>อันตรายมาก — Crew ไม่รู้ว่าผิด</td>
+                    <td>Cross-check กับ IRS/VOR/DME</td>
+                  </tr>
+                  <tr>
+                    <td><b style="color:var(--blue)">Solar Flare</b></td>
+                    <td>รังสีดวงอาทิตย์รบกวน Ionosphere</td>
+                    <td>GPS Error เพิ่มขึ้น</td>
+                    <td>ดู Space Weather Forecast</td>
+                  </tr>
+                  <tr>
+                    <td><b>RAIM Outage</b></td>
+                    <td>ดาวเทียมน้อยเกินไป Geometry แย่</td>
+                    <td>ไม่สามารถทำ GPS Approach ได้</td>
+                    <td>RAIM Prediction ก่อน Dispatch</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">📋 PBN Specifications</div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Spec</th><th>Accuracy</th><th>Monitoring</th><th>ใช้งาน</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="mono">RNAV 10</td><td class="mono">±10 NM</td><td><span class="tag tag-blue">ไม่บังคับ</span></td><td>Oceanic/Remote — ETOPS</td></tr>
+                    <tr><td class="mono">RNAV 5</td><td class="mono">±5 NM</td><td><span class="tag tag-blue">ไม่บังคับ</span></td><td>En-route continental</td></tr>
+                    <tr><td class="mono">RNAV 2</td><td class="mono">±2 NM</td><td><span class="tag tag-blue">ไม่บังคับ</span></td><td>En-route / TMA</td></tr>
+                    <tr><td class="mono">RNAV 1</td><td class="mono">±1 NM</td><td><span class="tag tag-blue">ไม่บังคับ</span></td><td>SID / STAR / Approach</td></tr>
+                    <tr><td class="mono"><b>RNP 4</b></td><td class="mono">±4 NM</td><td><span class="tag tag-amber">บังคับ+RAIM</span></td><td>Oceanic — ต้อง RAIM prediction</td></tr>
+                    <tr><td class="mono"><b>RNP 1</b></td><td class="mono">±1 NM</td><td><span class="tag tag-amber">บังคับ</span></td><td>SID / STAR Terminal</td></tr>
+                    <tr><td class="mono"><b>RNP APCH</b></td><td class="mono">±0.3 NM</td><td><span class="tag tag-amber">บังคับ</span></td><td>LNAV / LNAV+VNAV / LPV</td></tr>
+                    <tr><td class="mono"><b style="color:var(--red)">RNP AR</b></td><td class="mono">±0.1 NM</td><td><span class="tag tag-red">บังคับ+RF Legs</span></td><td>Curved Approach ผ่านภูเขา — ต้องมี OpSpec</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:7px;padding:10px;line-height:1.9">
+                <b style="color:var(--blue)">RNAV</b> — บินตาม Waypoints ไม่ต้อง VOR-to-VOR | ไม่มี Onboard Monitoring<br>
+                <b style="color:var(--purple)">RNP</b> — RNAV + OPMA (On-board Performance Monitoring &amp; Alerting) | สามารถบิน RF Leg (โค้ง) ได้<br>
+                <b style="color:var(--amber)">Dispatcher:</b> ตรวจ Aircraft NavSpec ใน OpSpec ก่อน Dispatch บน Route ที่ต้องการ RNP
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">⚡ SSR — Secondary Surveillance Radar</div>
+              <table>
+                <thead><tr><th>Mode</th><th>ข้อมูลที่ส่ง</th><th>ความถี่</th></tr></thead>
+                <tbody>
+                  <tr><td><b>Mode A</b></td><td>Squawk Code เท่านั้น</td><td class="mono">1030/1090 MHz</td></tr>
+                  <tr><td><b>Mode C</b></td><td>Squawk + Pressure Altitude</td><td class="mono">1030/1090 MHz</td></tr>
+                  <tr><td><b>Mode S</b></td><td>Selective Address + Data Link + ACAS</td><td class="mono">1030/1090 MHz</td></tr>
+                  <tr><td><b>ADS-B ES</b></td><td>Full Position + ID (Autonomous)</td><td class="mono">1090 MHz</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.9;background:var(--bg3);border-radius:7px;padding:8px">
+                <span class="mono" style="color:var(--red)">7700</span> Emergency &nbsp;|&nbsp;
+                <span class="mono" style="color:var(--amber)">7600</span> Radio Failure &nbsp;|&nbsp;
+                <span class="mono" style="color:var(--red)">7500</span> Hijack &nbsp;|&nbsp;
+                <span class="mono">2000</span> Default (ก่อนรับ Squawk)<br>
+                <b>TCAS/ACAS:</b> ใช้ Mode S Interrogation — RA (Resolution Advisory) มีความสำคัญเหนือ ATC ทุกกรณี
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPATCHER USE TAB -->
+      <div class="nav-pane" id="npane-dispatch">
+        <div class="sec-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">✈ NOTAM — Nav Aid ที่ Dispatcher ต้องตรวจ</div>
+              <table>
+                <thead><tr><th>NOTAM Item</th><th>ผลกระทบต่อ Dispatch</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><b>ILS RWY XX U/S</b></td><td>ลง ILS ไม่ได้ — ต้องใช้ VOR/NDB/RNAV แทน</td><td>เทียบ Minima ใหม่ + ดู WX</td></tr>
+                  <tr><td><b>ILS GS U/S</b></td><td>ใช้ LOC Only — ไม่มี Vertical → NPA Minima</td><td>MDA สูงขึ้น ตรวจ VIS</td></tr>
+                  <tr><td><b>VOR U/S</b></td><td>Route ที่ใช้ VOR อาจใช้ไม่ได้</td><td>ตรวจ FPL Route + Alternate</td></tr>
+                  <tr><td><b>NDB U/S</b></td><td>กระทบ NDB Approach Minima</td><td>ตรวจ Alternate Approach</td></tr>
+                  <tr><td><b>GPS UNRELIABLE</b></td><td>GNSS Approach ใช้ไม่ได้</td><td>Revert to Conventional Nav</td></tr>
+                  <tr><td><b>RAIM Outage</b></td><td>GPS Approach ทำไม่ได้ในช่วงเวลานั้น</td><td>คำนวณ RAIM Prediction</td></tr>
+                  <tr><td><b>RWY Lights U/S</b></td><td>Night Ops กระทบ → ต้องการ Higher Minima</td><td>ตรวจ ALS/PAPI/VASI status</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">📋 ATC FPL — Navigation Equipment Codes (Field 10)</div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:8px">กรอก Field 10 ใน ICAO FPL ให้ถูกต้องตาม Aircraft Equipment จริง</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+                <div>
+                  <div style="font-weight:600;color:var(--text);margin-bottom:4px">COM/NAV Equipment</div>
+                  <table>
+                    <tbody>
+                      <tr><td class="mono" style="color:var(--blue)">S</td><td>VHF RTF</td></tr>
+                      <tr><td class="mono">H</td><td>HF RTF</td></tr>
+                      <tr><td class="mono">D</td><td>DME</td></tr>
+                      <tr><td class="mono">O</td><td>VOR</td></tr>
+                      <tr><td class="mono">F</td><td>ADF</td></tr>
+                      <tr><td class="mono">I</td><td>ILS</td></tr>
+                      <tr><td class="mono">G</td><td>GNSS</td></tr>
+                      <tr><td class="mono">R</td><td>PBN Approved</td></tr>
+                      <tr><td class="mono">W</td><td>RVSM Approved</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <div style="font-weight:600;color:var(--text);margin-bottom:4px">Surveillance (Field 10b)</div>
+                  <table>
+                    <tbody>
+                      <tr><td class="mono">A</td><td>Mode A Transponder</td></tr>
+                      <tr><td class="mono">C</td><td>Mode C (Altitude)</td></tr>
+                      <tr><td class="mono">S</td><td>Mode S</td></tr>
+                      <tr><td class="mono">E</td><td>Mode S + ADS-B (1090ES)</td></tr>
+                      <tr><td class="mono">1</td><td>ADS-B Out 1090 MHz</td></tr>
+                      <tr><td class="mono">B1</td><td>ADS-B Out + In 1090</td></tr>
+                      <tr><td class="mono">U1</td><td>ADS-B Out UAT 978</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div style="margin-top:8px;padding:8px;background:var(--amber-bg);border:1px solid var(--amber);border-radius:6px;font-size:12px;color:var(--text2)">
+                <b style="color:var(--amber)">ตัวอย่าง KMA B747F:</b> <span class="mono">SDE2E3FGHIJ3J5M1RWXY</span> — ต้องตรงกับ Aircraft Configuration จริง
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">🗺 Airways &amp; Route Structure</div>
+              <table>
+                <thead><tr><th>Airway</th><th>ระดับ</th><th>ประเภท</th><th>ตัวอย่าง</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono" style="color:var(--text2)">A, B, G, R</td><td>Low/High</td><td>LF/MF/VHF Conventional</td><td>A1, B462, G458</td></tr>
+                  <tr><td class="mono">V</td><td>Low (&lt;FL180)</td><td>VHF (Victor) Airways USA</td><td>V23, V105</td></tr>
+                  <tr><td class="mono" style="color:var(--blue)">J</td><td>High (≥FL180)</td><td>Jet Route USA</td><td>J80, J146</td></tr>
+                  <tr><td class="mono" style="color:var(--green)">L, M, N, P</td><td>Low RNAV</td><td>RNAV Routes</td><td>L642, N884</td></tr>
+                  <tr><td class="mono" style="color:var(--green)">Q, T, Y, Z</td><td>High RNAV</td><td>RNAV High-level Routes</td><td>Q13, Y1</td></tr>
+                  <tr><td class="mono" style="color:var(--amber)">DCT</td><td>Any</td><td>Direct — ไม่ผ่าน Airway</td><td>NODMO DCT BOBOP</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg3);border-radius:7px;padding:8px;line-height:1.9">
+                <b style="color:var(--text)">K-Mile Routes ที่ใช้บ่อย:</b> N318 / N881 / L639 / A791 / B465 / R207 (เส้นทาง OMAA–VTCT)
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🌊 Oceanic Navigation — Dispatcher Checklist</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2">
+                <b style="color:var(--text)">ก่อน Release Oceanic Flight ตรวจ:</b><br>
+                <span style="color:var(--green)">✓</span> SELCAL code ถูกต้อง ใน FPL Field 18 (SEL/xxxx)<br>
+                <span style="color:var(--green)">✓</span> HF Frequencies สำหรับทุก FIR ที่ผ่าน<br>
+                <span style="color:var(--green)">✓</span> MNPS / RNAV 10 (RNP 10) Approval ใน Aircraft<br>
+                <span style="color:var(--green)">✓</span> NAT OTS Track Selected &amp; Filed ถูกต้อง (ถ้าผ่าน North Atlantic)<br>
+                <span style="color:var(--green)">✓</span> IRS Alignment ครบ — ไม่ต่ำกว่า 2 IRS<br>
+                <span style="color:var(--green)">✓</span> RAIM Prediction ผ่านตลอด Route<br>
+                <span style="color:var(--green)">✓</span> ETOPS Airport WX + Fuel ครบ<br>
+                <span style="color:var(--green)">✓</span> Mach Number ตรงกับ ATC Clearance<br>
+                <span style="color:var(--green)">✓</span> Position Reporting Waypoints ชัดเจน
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">🔒 GPS Jamming / Spoofing — Dispatcher Action</div>
+              <div style="font-size:12px;color:var(--text2);line-height:2;background:var(--red-bg);border:1px solid var(--red);border-radius:8px;padding:10px">
+                <b style="color:var(--red)">พื้นที่เสี่ยง GPS Jamming/Spoofing:</b><br>
+                ตะวันออกกลาง (Emirates FIR, Muscat FIR) | Eastern Europe | พื้นที่ความขัดแย้ง<br><br>
+                <b style="color:var(--text)">Dispatcher Actions:</b><br>
+                <span style="color:var(--amber)">✓</span> ตรวจ NOTAM: <span class="mono">GPS UNRELIABLE</span> ในพื้นที่ที่บินผ่าน<br>
+                <span style="color:var(--amber)">✓</span> แนะนำ Crew ให้ Cross-check IRS / VOR / DME Position<br>
+                <span style="color:var(--amber)">✓</span> ตรวจว่า Conventional Nav Aids ยังใช้งานได้บน Route<br>
+                <span style="color:var(--amber)">✓</span> Document ใน Dispatch Release ว่าพื้นที่ผ่านมี Jamming Risk
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ===== PNR ===== -->
@@ -2945,6 +3424,22 @@ function initSidebar() {
       if (btn) btn.textContent = '▶';
     }
   } catch(e) {}
+}
+
+
+// ===================== NAV AIDS TABS (isolated) =====================
+function showNTab(name, el) {
+  var page = document.getElementById('page-nav_aids');
+  if (!page) return;
+  page.querySelectorAll('.nav-pane').forEach(function(p) {
+    p.classList.remove('active');
+  });
+  page.querySelectorAll('.nav-tab').forEach(function(t) {
+    t.classList.remove('active');
+  });
+  var target = document.getElementById('npane-' + name);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
 }
 
 // ===================== DISPATCH TABS (isolated) =====================

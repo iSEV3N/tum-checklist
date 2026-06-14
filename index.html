@@ -181,6 +181,40 @@ select.inp{cursor:pointer}
 .nav-tab.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:600}
 .nav-pane{display:none}
 .nav-pane.active{display:block}
+
+/* ============================================================
+   RESPONSIVE FULL-WIDTH + DESKTOP UP-SCALING
+   - Mobile & tablet (< 1200px): unchanged, exactly as before.
+   - Desktop / web browser: app fills the whole window and the
+     content (text, cards, tables) scales up proportionally as
+     the window gets wider. No content/data is altered.
+   ============================================================ */
+html,body{width:100%}
+.layout{width:100%;min-height:100vh}
+
+@media (min-width:1200px){
+  .layout:not(.sb-hidden){grid-template-columns:248px 1fr}
+  .nav-item{font-size:15px}
+  .page{zoom:1.10}
+}
+@media (min-width:1500px){
+  .layout:not(.sb-hidden){grid-template-columns:264px 1fr}
+  .nav-item{font-size:15px}
+  .logo{font-size:19px}
+  .page{zoom:1.22}
+}
+@media (min-width:1900px){
+  .layout:not(.sb-hidden){grid-template-columns:288px 1fr}
+  .nav-item{font-size:16px}
+  .logo{font-size:20px}
+  .page{zoom:1.35}
+}
+@media (min-width:2400px){
+  .layout:not(.sb-hidden){grid-template-columns:320px 1fr}
+  .nav-item{font-size:17px}
+  .logo{font-size:22px}
+  .page{zoom:1.55}
+}
 </style>
 </head>
 <body>
